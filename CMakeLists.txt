@@ -30,12 +30,12 @@ endif()
 # Find all platform-independent required packages
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(SDL3 REQUIRED)
+find_package(glfw3 REQUIRED)
 
 # Link library against required packages
 target_link_libraries(Mosaic PRIVATE GLEW::GLEW)
 target_link_libraries(Mosaic PRIVATE OpenGL::GL)
-target_link_libraries(Mosaic PRIVATE SDL3::SDL3)
+target_link_libraries(Mosaic PRIVATE glfw)
 
 # Clear install directory to avoid stale files
 install(CODE "
@@ -51,9 +51,7 @@ include(CMakePackageConfigHelpers)
 target_include_directories(Mosaic
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inline>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Mosaic/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/Mosaic/inline>
 )
 
 # Install the library
@@ -66,10 +64,11 @@ install(TARGETS Mosaic
 
 # Install headers and inline files
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Mosaic/include)
-install(DIRECTORY inline/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Mosaic/inline)
 
 # Install primary interface files
 install(DIRECTORY interface/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Mosaic)
+
+add_compile_definitions(MOSAIC_DEV_ENV)
 
 # Export the CMake config for consumers
 install(EXPORT MosaicTargets

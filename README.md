@@ -2,7 +2,9 @@
 
 ## Overview
 
-**Mosaic** is a C++ framework focused on making 2D and 3D game development more accessible. The framework aims to support most major platforms, includin Windows, macOS, and most Linux distributions. Whether you're building a quick game jam prototype or a full-fledged indie title, Mosaic provides the tools you need — without the bloat.
+**Mosaic** is a C++ framework focused on making 2D and 3D game development harder to mess up. The framework aims to support most major platforms, including Windows, macOS, and most Linux distributions. Whether you're building a quick game jam prototype or a full-fledged indie title, Mosaic provides the tools you need — without the bloat.
+
+At its core, Mosaic embraces a strict and explicit API design, inspired by modern graphics APIs like Vulkan. This approach prioritises clarity, predictability, and control, empowering developers to understand exactly what happens under the hood. Instead of hidden magic or implicit behaviour, Mosaic demands deliberate actions and explicit configuration, reducing bugs and unexpected side effects. This philosophy makes Mosaic especially suited for developers who want full control over their engine's inner workings, while still benefiting from robust foundational systems.
 
 ## Features
 
@@ -19,19 +21,17 @@
 
 ## Roadmap
 
-- **Reduce Dependencies**: Currently working to remove dependence on multiple libraries
-- **Rendering System**: Plans to integrate a fully featured rendering system
-- **Audio Playback**: Plans to integrate [OpenAL](https://www.openal.org/)
+- **Rendering System**: Currently working to integrate a fully featured rendering system
+- **Audio Playback**: Plans to integrate [OpenAL](https://www.openal.org/) for in-depth audio support
 - **More Rendering Backends**: Potential future support for rendering backends like Metal or DirectX
 
 ## Third-Party Libraries
 
 Mosaic Engine makes use of the following open-source libraries:
 
-- **[WindowKit](https://github.com/RookieKuch09/WindowKit)**: Developed in-house for Mosaic (MIT License)
-- **SDL3** — windowing and input, though this will be replaced with WindowKit
-- **GLM** — math library, currently being replaced
-- **GLEW** — OpenGL Extension Wrangler
+- **GLFW** — Cross-platform windowing and input
+- **GLM** — Multipurpose mathematics library
+- **GLEW** — OpenGL extension loader
 
 Thanks to the authors and contributors of these projects!
 
