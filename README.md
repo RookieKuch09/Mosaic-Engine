@@ -32,6 +32,7 @@ Mosaic Engine makes use of the following open-source libraries:
 - **GLFW** — Cross-platform windowing and input
 - **GLM** — Multipurpose mathematics library
 - **GLEW** — OpenGL extension loader
+- **Boost** — Additional C++ types and systems
 
 Thanks to the authors and contributors of these projects!
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#ifndef MOSAIC_DEV_ENV
-
 #include <frontend/instance.hpp>
 
 int main()
@@ -12,5 +10,3 @@ int main()
 
     return instance->Run();
 }
-
-#endif

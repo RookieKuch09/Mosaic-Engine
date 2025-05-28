@@ -12,10 +12,56 @@
 
 #include <backend/rendering/renderer.hpp>
 
+#include <functional>
+
 namespace Mosaic::Frontend
 {
-    class LogicContext;
-    class RenderContext;
+    class LocalContextManager;
+
+    class LogicContext
+    {
+    public:
+        LogicContext(LocalContextManager& localContextManager);
+        ~LogicContext();
+
+        void Start();
+        void Update();
+        void Close();
+
+    private:
+        ComponentManager mComponentManager;
+        EventManager mEventManager;
+
+        LocalContextManager& mLocalContextManager;
+
+        bool mStarted;
+
+        friend class LocalContextManager;
+    };
+
+    class RenderContext
+    {
+    public:
+        RenderContext(LocalContextManager& localContextManager);
+        ~RenderContext();
+
+        void Start();
+        void Update();
+        void Close();
+
+    private:
+        ComponentManager mComponentManager;
+        EventManager mEventManager;
+
+        Frontend::Rendering::RenderTarget mRenderTarget;
+        Frontend::Rendering::LocalRenderGraph mLocalRenderGraph;
+
+        LocalContextManager& mLocalContextManager;
+
+        bool mStarted;
+
+        friend class LocalContextManager;
+    };
 
     class LocalContextManager
     {
@@ -63,50 +109,5 @@ namespace Mosaic::Frontend
         Backend::Rendering::Renderer mRenderer;
 
         Frontend::Rendering::GlobalRenderGraph mGlobalRenderGraph;
-    };
-
-    class LogicContext
-    {
-    public:
-        LogicContext(LocalContextManager& localContextManager);
-        ~LogicContext();
-
-        void Start();
-        void Update();
-        void Close();
-
-    private:
-        ComponentManager mComponentManager;
-        EventManager mEventManager;
-
-        LocalContextManager& mLocalContextManager;
-
-        bool mStarted;
-
-        friend class LocalContextManager;
-    };
-
-    class RenderContext
-    {
-    public:
-        RenderContext(LocalContextManager& localContextManager);
-        ~RenderContext();
-
-        void Start();
-        void Update();
-        void Close();
-
-    private:
-        ComponentManager mComponentManager;
-        EventManager mEventManager;
-
-        Frontend::Rendering::RenderTarget mRenderTarget;
-        Frontend::Rendering::LocalRenderGraph mLocalRenderGraph;
-
-        LocalContextManager& mLocalContextManager;
-
-        bool mStarted;
-
-        friend class LocalContextManager;
     };
 }

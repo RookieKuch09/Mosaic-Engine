@@ -13,10 +13,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 file(GLOB_RECURSE SOURCES "source/**/*.cpp")
 
 # Create the library
-add_library(Mosaic)
-
-# Set the library's sources
-target_sources(Mosaic PRIVATE ${SOURCES})
+add_library(Mosaic ${SOURCES})
 
 # Handle Apple stuff
 if(APPLE)
@@ -62,13 +59,9 @@ install(TARGETS Mosaic
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-# Install headers and inline files
+# Install all header files
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Mosaic/include)
-
-# Install primary interface files
 install(DIRECTORY interface/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Mosaic)
-
-add_compile_definitions(MOSAIC_DEV_ENV)
 
 # Export the CMake config for consumers
 install(EXPORT MosaicTargets

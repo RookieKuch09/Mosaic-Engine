@@ -2,6 +2,62 @@
 
 namespace Mosaic::Frontend
 {
+    LogicContext::LogicContext(LocalContextManager& localContextManager)
+        : mLocalContextManager(localContextManager), mStarted(false)
+    {
+        mLocalContextManager.Register(this);
+    }
+
+    LogicContext::~LogicContext()
+    {
+        mLocalContextManager.Deregister(this);
+    }
+
+    void LogicContext::Start()
+    {
+        mComponentManager.Start();
+        mEventManager.Update();
+    }
+
+    void LogicContext::Update()
+    {
+        mComponentManager.Update();
+        mEventManager.Update();
+    }
+
+    void LogicContext::Close()
+    {
+        mComponentManager.Close();
+    }
+
+    RenderContext::RenderContext(LocalContextManager& localContextManager)
+        : mLocalContextManager(localContextManager), mStarted(false)
+    {
+        mLocalContextManager.Register(this);
+    }
+
+    RenderContext::~RenderContext()
+    {
+        mLocalContextManager.Deregister(this);
+    }
+
+    void RenderContext::Start()
+    {
+        mComponentManager.Start();
+        mEventManager.Update();
+    }
+
+    void RenderContext::Update()
+    {
+        mComponentManager.Update();
+        mEventManager.Update();
+    }
+
+    void RenderContext::Close()
+    {
+        mComponentManager.Close();
+    }
+
     void LocalContextManager::Start()
     {
         FlushQueuedStartContexts();
@@ -127,7 +183,7 @@ namespace Mosaic::Frontend
                 }
                 else
                 {
-                    Throw("{} is not already registered and cannot be deregistered", contextType);
+                    Throw("{} is already registered and cannot be deregistered", contextType);
                 }
             }
 
@@ -165,61 +221,5 @@ namespace Mosaic::Frontend
         mRenderer.Close();
 
         mLocalContextManager.Close();
-    }
-
-    LogicContext::LogicContext(LocalContextManager& localContextManager)
-        : mLocalContextManager(localContextManager), mStarted(false)
-    {
-        mLocalContextManager.Register(this);
-    }
-
-    LogicContext::~LogicContext()
-    {
-        mLocalContextManager.Deregister(this);
-    }
-
-    void LogicContext::Start()
-    {
-        mComponentManager.Start();
-        mEventManager.Update();
-    }
-
-    void LogicContext::Update()
-    {
-        mComponentManager.Update();
-        mEventManager.Update();
-    }
-
-    void LogicContext::Close()
-    {
-        mComponentManager.Close();
-    }
-
-    RenderContext::RenderContext(LocalContextManager& localContextManager)
-        : mLocalContextManager(localContextManager), mStarted(false)
-    {
-        mLocalContextManager.Register(this);
-    }
-
-    RenderContext::~RenderContext()
-    {
-        mLocalContextManager.Deregister(this);
-    }
-
-    void RenderContext::Start()
-    {
-        mComponentManager.Start();
-        mEventManager.Update();
-    }
-
-    void RenderContext::Update()
-    {
-        mComponentManager.Update();
-        mEventManager.Update();
-    }
-
-    void RenderContext::Close()
-    {
-        mComponentManager.Close();
     }
 }
