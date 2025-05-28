@@ -1,4 +1,4 @@
-#include <frontend/instance.hpp>
+#include "../../include/frontend/instance.hpp"
 
 namespace Mosaic::Frontend
 {
@@ -6,9 +6,11 @@ namespace Mosaic::Frontend
     {
         try
         {
-            mGlobalContext.Start();
-            mGlobalContext.Update();
-            mGlobalContext.Close();
+            Setup();
+
+            GlobalContext.Start();
+            GlobalContext.Update();
+            GlobalContext.Stop();
 
             return 0;
         }

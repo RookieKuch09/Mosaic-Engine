@@ -1,13 +1,12 @@
 #pragma once
 
-#include <frontend/contexts.hpp>
+#include "contexts.hpp"
 
 namespace Mosaic::Frontend
 {
     class Instance
     {
     public:
-        Instance();
         virtual ~Instance() = default;
 
         static Instance* Create();
@@ -20,7 +19,6 @@ namespace Mosaic::Frontend
         template <typename T>
         T& CreateResource(const std::string& id);
 
-    private:
-        GlobalContext mGlobalContext;
+        GlobalContext GlobalContext;
     };
 }

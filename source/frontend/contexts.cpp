@@ -1,77 +1,40 @@
-#include <frontend/contexts.hpp>
+#include "../../include/frontend/contexts.hpp"
 
 namespace Mosaic::Frontend
 {
-    LogicContext::LogicContext(LocalContextManager& localContextManager)
+    LocalContext::LocalContext(LocalContextManager& localContextManager)
         : mLocalContextManager(localContextManager), mStarted(false)
     {
         mLocalContextManager.Register(this);
     }
 
-    LogicContext::~LogicContext()
+    LocalContext::~LocalContext()
     {
         mLocalContextManager.Deregister(this);
     }
 
-    void LogicContext::Start()
+    void LocalContext::Start()
     {
         mComponentManager.Start();
-        mEventManager.Update();
     }
 
-    void LogicContext::Update()
+    void LocalContext::Update()
     {
         mComponentManager.Update();
         mEventManager.Update();
     }
 
-    void LogicContext::Close()
+    void LocalContext::Stop()
     {
-        mComponentManager.Close();
-    }
-
-    RenderContext::RenderContext(LocalContextManager& localContextManager)
-        : mLocalContextManager(localContextManager), mStarted(false)
-    {
-        mLocalContextManager.Register(this);
-    }
-
-    RenderContext::~RenderContext()
-    {
-        mLocalContextManager.Deregister(this);
-    }
-
-    void RenderContext::Start()
-    {
-        mComponentManager.Start();
-        mEventManager.Update();
-    }
-
-    void RenderContext::Update()
-    {
-        mComponentManager.Update();
-        mEventManager.Update();
-    }
-
-    void RenderContext::Close()
-    {
-        mComponentManager.Close();
+        mComponentManager.Stop();
     }
 
     void LocalContextManager::Start()
     {
         FlushQueuedStartContexts();
-        FlushQueuedCloseContexts();
+        FlushQueuedStopContexts();
 
-        for (const auto& context : mLogicContexts)
-        {
-            auto& ctx = context.get();
-
-            ctx.mStarted = true;
-            ctx.Start();
-        }
-
-        for (const auto& context : mRenderContexts)
+        for (const auto& context : mContexts)
         {
             auto& ctx = context.get();
 
@@ -83,22 +46,9 @@ namespace Mosaic::Frontend
     void LocalContextManager::Update()
     {
         FlushQueuedStartContexts();
-        FlushQueuedCloseContexts();
+        FlushQueuedStopContexts();
 
-        for (const auto& context : mLogicContexts)
-        {
-            auto& ctx = context.get();
-
-            if (not ctx.mStarted)
-            {
-                ctx.mStarted = true;
-                ctx.Start();
-            }
-
-            ctx.Update();
-        }
-
-        for (const auto& context : mRenderContexts)
+        for (const auto& context : mContexts)
         {
             auto& ctx = context.get();
 
@@ -112,59 +62,47 @@ namespace Mosaic::Frontend
         }
     }
 
-    void LocalContextManager::Close()
+    void LocalContextManager::Stop()
     {
-        for (const auto& context : mLogicContexts)
+        for (const auto& context : mContexts)
         {
             auto& ctx = context.get();
 
             if (ctx.mStarted)
             {
-                ctx.Close();
+                ctx.Stop();
             }
         }
 
-        for (const auto& context : mRenderContexts)
+        for (const auto& context : mContexts)
         {
             auto& ctx = context.get();
 
             if (ctx.mStarted)
             {
-                ctx.Close();
+                ctx.Stop();
             }
         }
     }
 
-    void LocalContextManager::Register(LogicContext* logicContext)
+    void LocalContextManager::Register(LocalContext* context)
     {
-        mStartQueuedLogicContexts.push_back(std::ref(*logicContext));
+        mStartQueuedContexts.push_back(std::ref(*context));
     }
 
-    void LocalContextManager::Register(RenderContext* renderContext)
+    void LocalContextManager::Deregister(LocalContext* context)
     {
-        mStartQueuedRenderContexts.push_back(std::ref(*renderContext));
-    }
-
-    void LocalContextManager::Deregister(LogicContext* logicContext)
-    {
-        mCloseQueuedLogicContexts.push_back(std::ref(*logicContext));
-    }
-
-    void LocalContextManager::Deregister(RenderContext* renderContext)
-    {
-        mCloseQueuedRenderContexts.push_back(std::ref(*renderContext));
+        mStopQueuedContexts.push_back(std::ref(*context));
     }
 
     void LocalContextManager::FlushQueuedStartContexts()
     {
-        std::move(mStartQueuedLogicContexts.begin(), mStartQueuedLogicContexts.end(), std::back_inserter(mLogicContexts));
-        std::move(mStartQueuedRenderContexts.begin(), mStartQueuedRenderContexts.end(), std::back_inserter(mRenderContexts));
+        std::move(mStartQueuedContexts.begin(), mStartQueuedContexts.end(), std::back_inserter(mContexts));
 
-        mStartQueuedLogicContexts.clear();
-        mStartQueuedRenderContexts.clear();
+        mStartQueuedContexts.clear();
     }
 
-    void LocalContextManager::FlushQueuedCloseContexts()
+    void LocalContextManager::FlushQueuedStopContexts()
     {
         auto removeContext = [](auto& vec, auto& queue, const char* contextType)
         {
@@ -190,16 +128,13 @@ namespace Mosaic::Frontend
             queue.clear();
         };
 
-        removeContext(mLogicContexts, mCloseQueuedLogicContexts, "Logic Context");
-        removeContext(mRenderContexts, mCloseQueuedRenderContexts, "Render Context");
+        removeContext(mContexts, mStopQueuedContexts, "Local Context");
     }
 
     void GlobalContext::Start()
     {
         mWindow.Start();
         mRenderer.Start();
-
-        mEventManager.Update();
 
         mLocalContextManager.Start();
     }
@@ -215,11 +150,21 @@ namespace Mosaic::Frontend
         mLocalContextManager.Update();
     }
 
-    void GlobalContext::Close()
+    void GlobalContext::Stop()
     {
-        mWindow.Close();
-        mRenderer.Close();
+        mWindow.Stop();
+        mRenderer.Stop();
 
-        mLocalContextManager.Close();
+        mLocalContextManager.Stop();
+    }
+
+    LocalContextManager& GlobalContext::GetContextManager()
+    {
+        return mLocalContextManager;
+    }
+
+    Registry& GlobalContext::GetRegistry()
+    {
+        return mResourceRegistry;
     }
 }

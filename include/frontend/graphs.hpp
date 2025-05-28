@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Mosaic::Frontend::Rendering
+namespace Mosaic::Frontend
 {
     class GlobalRenderGraph
     {

@@ -1,16 +1,12 @@
 #pragma once
 
-#include <frontend/components.hpp>
-#include <frontend/events.hpp>
-#include <frontend/registry.hpp>
-
-#include <frontend/rendering/graphs.hpp>
-#include <frontend/rendering/targets.hpp>
-
-#include <backend/inputs.hpp>
-#include <backend/window.hpp>
-
-#include <backend/rendering/renderer.hpp>
+#include "components.hpp"
+#include "events.hpp"
+#include "graphs.hpp"
+#include "inputs.hpp"
+#include "registry.hpp"
+#include "renderer.hpp"
+#include "window.hpp"
 
 #include <functional>
 
@@ -18,15 +14,15 @@ namespace Mosaic::Frontend
 {
     class LocalContextManager;
 
-    class LogicContext
+    class LocalContext
     {
     public:
-        LogicContext(LocalContextManager& localContextManager);
-        ~LogicContext();
+        LocalContext(LocalContextManager& localContextManager);
+        ~LocalContext();
 
         void Start();
         void Update();
-        void Close();
+        void Stop();
 
     private:
         ComponentManager mComponentManager;
@@ -37,30 +33,8 @@ namespace Mosaic::Frontend
         bool mStarted;
 
         friend class LocalContextManager;
-    };
-
-    class RenderContext
-    {
-    public:
-        RenderContext(LocalContextManager& localContextManager);
-        ~RenderContext();
-
-        void Start();
-        void Update();
-        void Close();
-
-    private:
-        ComponentManager mComponentManager;
-        EventManager mEventManager;
-
-        Frontend::Rendering::RenderTarget mRenderTarget;
-        Frontend::Rendering::LocalRenderGraph mLocalRenderGraph;
-
-        LocalContextManager& mLocalContextManager;
-
-        bool mStarted;
-
-        friend class LocalContextManager;
+        friend class GlobalContext;
+        friend class Component;
     };
 
     class LocalContextManager
@@ -68,26 +42,18 @@ namespace Mosaic::Frontend
     public:
         void Start();
         void Update();
-        void Close();
+        void Stop();
 
-        void Register(LogicContext* logicContext);
-        void Register(RenderContext* renderContext);
-
-        void Deregister(LogicContext* logicContext);
-        void Deregister(RenderContext* renderContext);
+        void Register(LocalContext* context);
+        void Deregister(LocalContext* context);
 
     private:
         void FlushQueuedStartContexts();
-        void FlushQueuedCloseContexts();
+        void FlushQueuedStopContexts();
 
-        std::vector<std::reference_wrapper<LogicContext>> mLogicContexts;
-        std::vector<std::reference_wrapper<RenderContext>> mRenderContexts;
-
-        std::vector<std::reference_wrapper<LogicContext>> mStartQueuedLogicContexts;
-        std::vector<std::reference_wrapper<RenderContext>> mStartQueuedRenderContexts;
-
-        std::vector<std::reference_wrapper<LogicContext>> mCloseQueuedLogicContexts;
-        std::vector<std::reference_wrapper<RenderContext>> mCloseQueuedRenderContexts;
+        std::vector<std::reference_wrapper<LocalContext>> mContexts;
+        std::vector<std::reference_wrapper<LocalContext>> mStartQueuedContexts;
+        std::vector<std::reference_wrapper<LocalContext>> mStopQueuedContexts;
     };
 
     class GlobalContext
@@ -95,19 +61,27 @@ namespace Mosaic::Frontend
     public:
         void Start();
         void Update();
-        void Close();
+        void Stop();
+
+        template <typename T, typename... Args>
+        T& NewResource(const std::string& id, Args&... constructorParams)
+        {
+            auto resource = std::make_shared<T>(constructorParams...);
+            mResourceRegistry.Add<T>(id, std::move(resource));
+
+            return mResourceRegistry.Get<T>(id);
+        }
+
+        LocalContextManager& GetContextManager();
+        Registry& GetRegistry();
 
     private:
-        ComponentManager mComponentManager;
         EventManager mEventManager;
         Registry mResourceRegistry;
         LocalContextManager mLocalContextManager;
-
-        Backend::Window mWindow;
-        Backend::InputManager mInputManager;
-
-        Backend::Rendering::Renderer mRenderer;
-
-        Frontend::Rendering::GlobalRenderGraph mGlobalRenderGraph;
+        Window mWindow;
+        InputManager mInputManager;
+        Renderer mRenderer;
+        GlobalRenderGraph mGlobalRenderGraph;
     };
 }

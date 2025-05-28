@@ -1,12 +1,12 @@
 #pragma once
 
-namespace Mosaic::Backend
+namespace Mosaic::Frontend
 {
     class Window
     {
     public:
         void Start();
         void Update();
-        void Close();
+        void Stop();
     };
 }

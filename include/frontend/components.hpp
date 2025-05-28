@@ -1,21 +1,28 @@
 #pragma once
 
+#include "events.hpp"
+
 #include <functional>
 #include <vector>
 
 namespace Mosaic::Frontend
 {
     class ComponentManager;
+    class Registry;
+    class LocalContext;
 
-    class Component
+    class Component : public EventLayer
     {
     public:
-        Component(ComponentManager& componentManager);
+        Component(LocalContext& logicContext, Registry& registry);
         virtual ~Component();
 
         virtual void Start();
         virtual void Update();
-        virtual void Close();
+        virtual void Stop();
+
+    protected:
+        Registry& ResourceRegistry;
 
     private:
         ComponentManager& mComponentManager;
@@ -30,17 +37,17 @@ namespace Mosaic::Frontend
     public:
         void Start();
         void Update();
-        void Close();
+        void Stop();
 
         void Register(Component* component);
         void Deregister(Component* component);
 
     private:
         void FlushQueuedStartComponents();
-        void FlushQueuedCloseComponents();
+        void FlushQueuedStopComponents();
 
         std::vector<std::reference_wrapper<Component>> mComponents;
         std::vector<std::reference_wrapper<Component>> mStartQueuedComponents;
-        std::vector<std::reference_wrapper<Component>> mCloseQueuedComponents;
+        std::vector<std::reference_wrapper<Component>> mStopQueuedComponents;
     };
 }

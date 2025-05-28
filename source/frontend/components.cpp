@@ -1,10 +1,11 @@
-#include <frontend/components.hpp>
-#include <frontend/logging.hpp>
+#include "../../include/frontend/components.hpp"
+#include "../../include/frontend/contexts.hpp"
+#include "../../include/frontend/logging.hpp"
 
 namespace Mosaic::Frontend
 {
-    Component::Component(ComponentManager& componentManager)
-        : mComponentManager(componentManager), mStarted(false)
+    Component::Component(LocalContext& context, Registry& registry)
+        : mComponentManager(context.mComponentManager), ResourceRegistry(registry), EventLayer(context.mEventManager), mStarted(false)
     {
         mComponentManager.Register(this);
     }
@@ -22,14 +23,14 @@ namespace Mosaic::Frontend
     {
     }
 
-    void Component::Close()
+    void Component::Stop()
     {
     }
 
     void ComponentManager::Start()
     {
         FlushQueuedStartComponents();
-        FlushQueuedCloseComponents();
+        FlushQueuedStopComponents();
 
         for (const auto& component : mComponents)
         {
@@ -43,7 +44,7 @@ namespace Mosaic::Frontend
     void ComponentManager::Update()
     {
         FlushQueuedStartComponents();
-        FlushQueuedCloseComponents();
+        FlushQueuedStopComponents();
 
         for (const auto& component : mComponents)
         {
@@ -59,7 +60,7 @@ namespace Mosaic::Frontend
         }
     }
 
-    void ComponentManager::Close()
+    void ComponentManager::Stop()
     {
         for (const auto& component : mComponents)
         {
@@ -67,7 +68,7 @@ namespace Mosaic::Frontend
 
             if (cmp.mStarted)
             {
-                cmp.Close();
+                cmp.Stop();
             }
         }
     }
@@ -79,7 +80,7 @@ namespace Mosaic::Frontend
 
     void ComponentManager::Deregister(Component* logicContext)
     {
-        mCloseQueuedComponents.push_back(std::ref(*logicContext));
+        mStopQueuedComponents.push_back(std::ref(*logicContext));
     }
 
     void ComponentManager::FlushQueuedStartComponents()
@@ -89,7 +90,7 @@ namespace Mosaic::Frontend
         mStartQueuedComponents.clear();
     }
 
-    void ComponentManager::FlushQueuedCloseComponents()
+    void ComponentManager::FlushQueuedStopComponents()
     {
         auto removeContext = [](auto& vec, auto& queue, const char* contextType)
         {
@@ -115,6 +116,6 @@ namespace Mosaic::Frontend
             queue.clear();
         };
 
-        removeContext(mComponents, mCloseQueuedComponents, "Component");
+        removeContext(mComponents, mStopQueuedComponents, "Component");
     }
 }

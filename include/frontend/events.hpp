@@ -1,46 +1,20 @@
 #pragma once
 
+#include "../../include/frontend/logging.hpp"
+
+#include <boost/type_index.hpp>
+
+#include <algorithm>
+#include <any>
 #include <functional>
+#include <queue>
+#include <typeindex>
+#include <unordered_map>
+#include <vector>
 
 namespace Mosaic::Frontend
 {
     class EventManager;
-
-    struct EventBase
-    {
-        virtual ~EventBase() = default;
-    };
-
-    template <typename T, typename U>
-    struct Event : EventBase
-    {
-        Event(const T* origin, const T& data)
-            : Origin(origin), Data(data)
-        {
-        }
-
-        const T* Origin;
-        U Data;
-    };
-
-    class EventLayer
-    {
-    public:
-        EventLayer(EventManager& eventManager);
-        virtual ~EventLayer();
-
-        template <typename T, typename U>
-        void Emit(const T* origin, const U& data);
-
-        template <typename T, typename U>
-        void SetCallback(const T* listener, void (T::*callback)(const Event<T, U>&));
-
-        template <typename T, typename U>
-        void RevokeCallback(const T* listener, void (T::*callback)(const Event<T, U>&));
-
-        template <typename T, typename U>
-        void RevokeCallbacks(const T* listener);
-    };
 
     class EventManager
     {
@@ -48,6 +22,71 @@ namespace Mosaic::Frontend
         void Update();
 
     private:
-        std::vector<std::reference_wrapper<EventBase>> mEventQueue;
+        template <typename T, typename TClass>
+        void SetCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        {
+            auto call = [subscriber, callback](const std::any& event)
+            {
+                (subscriber->*callback)(std::any_cast<const T&>(event));
+            };
+
+            auto& list = mListeners[typeid(T)];
+
+            auto it = std::find_if(list.begin(), list.end(),
+                                   [subscriber](const EventListener& l)
+                                   { return l.Subscriber == subscriber; });
+            if (it == list.end())
+            {
+                list.push_back({subscriber, call});
+            }
+            else
+            {
+                Throw("Subscriber {} already subscribed to event {}", boost::typeindex::type_id<TClass>().pretty_name(), boost::typeindex::type_id<T>().pretty_name());
+            }
+        }
+
+        void RevokeCallbacks(void* subscriber);
+
+        template <typename T>
+        void EmitEvent(const T& event)
+        {
+            mEventQueue[typeid(T)].push(event);
+        }
+
+        struct EventListener
+        {
+            void* Subscriber;
+
+            std::function<void(const std::any&)> Callback;
+        };
+
+        std::unordered_map<std::type_index, std::queue<std::any>> mEventQueue;
+        std::unordered_map<std::type_index, std::vector<EventListener>> mListeners;
+
+        friend class EventLayer;
+    };
+
+    class EventLayer
+    {
+    public:
+        EventLayer(EventManager& eventManager);
+        virtual ~EventLayer() = default;
+
+        template <typename T, typename TClass>
+        void SetCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        {
+            mEventManager.SetCallback(subscriber, callback);
+        }
+
+        void RevokeCallbacks(void* subscriber);
+
+        template <typename T>
+        void EmitEvent(const T& event)
+        {
+            mEventManager.EmitEvent(event);
+        }
+
+    private:
+        EventManager& mEventManager;
     };
 }

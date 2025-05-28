@@ -1,6 +1,6 @@
 #pragma once
 
-#include <frontend/logging.hpp>
+#include "logging.hpp"
 
 #include <boost/type_index.hpp>
 
@@ -53,11 +53,11 @@ namespace Mosaic::Frontend
 
             auto& storage = GetOrCreateStorage<T>();
 
-            storage[id] = std::move(object);
+            storage.objects[id] = std::move(object);
         }
 
         template <typename T>
-        std::shared_ptr<T> Get(const Handle<T>& handle) const
+        T& Get(const Handle<T>& handle) const
         {
             return Get<T>(handle.GetID());
         }
@@ -75,7 +75,7 @@ namespace Mosaic::Frontend
         }
 
         template <typename T>
-        std::shared_ptr<T> Get(const std::string& id) const
+        T& Get(const std::string& id) const
         {
             if (not Contains<T>(id))
             {
@@ -84,7 +84,7 @@ namespace Mosaic::Frontend
 
             const auto& storage = *static_cast<const Storage<T>*>(storageMap.at(std::type_index(typeid(T))).get());
 
-            return storage.objects.at(id);
+            return *storage.objects.at(id).get();
         }
 
         template <typename T>
@@ -116,6 +116,28 @@ namespace Mosaic::Frontend
             }
 
             storageMap.erase(it);
+        }
+
+        template <typename T>
+        std::string GetID(const T* ptr) const
+        {
+            auto it = storageMap.find(std::type_index(typeid(T)));
+            if (it == storageMap.end())
+            {
+                Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
+            }
+
+            const auto& storage = *static_cast<const Storage<T>*>(it->second.get());
+
+            for (const auto& [id, objPtr] : storage.objects)
+            {
+                if (objPtr.get() == ptr)
+                {
+                    return id;
+                }
+            }
+
+            Throw("Object pointer of type {} not found in registry", boost::typeindex::type_id<T>().pretty_name());
         }
 
         template <typename T>
