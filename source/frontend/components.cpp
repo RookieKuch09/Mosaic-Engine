@@ -1,6 +1,6 @@
 #include "../../include/frontend/components.hpp"
 #include "../../include/frontend/contexts.hpp"
-#include "../../include/frontend/logging.hpp"
+#include "../../include/utilities/logging.hpp"
 
 namespace Mosaic::Frontend
 {
@@ -109,7 +109,7 @@ namespace Mosaic::Frontend
                 }
                 else
                 {
-                    Throw("{} is already registered and cannot be deregistered", contextType);
+                    Utilities::Throw("{} is already registered and cannot be deregistered", contextType);
                 }
             }
 

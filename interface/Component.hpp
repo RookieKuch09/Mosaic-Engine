@@ -3,11 +3,12 @@
 #if __cplusplus >= 202300L
 
 #include <Mosaic/include/frontend/instance.hpp>
-#include <Mosaic/include/frontend/logging.hpp>
+#include <Mosaic/include/utilities/logging.hpp>
 
 namespace Mosaic
 {
     using namespace Frontend;
+    using namespace Utilities;
 }
 
 #else

@@ -1,7 +1,13 @@
 #include "../../include/frontend/instance.hpp"
+#include "frontend/contexts.hpp"
 
 namespace Mosaic::Frontend
 {
+    Instance::Instance(const std::string& configPath)
+        : GlobalContext(configPath)
+    {
+    }
+
     std::uint32_t Instance::Run()
     {
         try
@@ -16,7 +22,7 @@ namespace Mosaic::Frontend
         }
         catch (const std::exception& error)
         {
-            LogError("Fatal runtime exception: {}", error.what());
+            Utilities::LogError("Fatal runtime exception: {}", error.what());
 
             return 1;
         }

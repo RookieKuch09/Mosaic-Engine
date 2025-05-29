@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logging.hpp"
+#include "../utilities/logging.hpp"
 
 #include <boost/type_index.hpp>
 
@@ -37,7 +37,7 @@ namespace Mosaic::Frontend
         {
             if (not Contains<T>(id))
             {
-                Throw("No object of type {} named {} found", boost::typeindex::type_id<T>().pretty_name(), id);
+                Utilities::Throw("No object of type {} named {} found", boost::typeindex::type_id<T>().pretty_name(), id);
             }
 
             return Handle<T>{id};
@@ -48,12 +48,29 @@ namespace Mosaic::Frontend
         {
             if (Contains<T>(id))
             {
-                Throw("Object of type {} named {} already exists", boost::typeindex::type_id<T>().pretty_name(), id);
+                Utilities::Throw("Object of type {} named {} already exists", boost::typeindex::type_id<T>().pretty_name(), id);
             }
 
             auto& storage = GetOrCreateStorage<T>();
 
             storage.objects[id] = std::move(object);
+        }
+
+        template <typename T>
+        std::string Add(std::shared_ptr<T> object)
+        {
+            auto& storage = GetOrCreateStorage<T>();
+            auto& counter = mNameCounters[std::type_index(typeid(T))];
+
+            std::string id;
+            do
+            {
+                id = std::format("{}#{}", boost::typeindex::type_id<T>().pretty_name(), counter++);
+            } while (storage.objects.contains(id));
+
+            storage.objects[id] = std::move(object);
+
+            return id;
         }
 
         template <typename T>
@@ -65,10 +82,10 @@ namespace Mosaic::Frontend
         template <typename T>
         const std::unordered_map<std::string, std::shared_ptr<T>>& GetAll() const
         {
-            auto it = storageMap.find(std::type_index(typeid(T)));
-            if (it == storageMap.end())
+            auto it = mStorageMap.find(std::type_index(typeid(T)));
+            if (it == mStorageMap.end())
             {
-                Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
             }
 
             return static_cast<const Storage<T>*>(it->second.get())->objects;
@@ -79,10 +96,10 @@ namespace Mosaic::Frontend
         {
             if (not Contains<T>(id))
             {
-                Throw("No object of type {} named {} found", boost::typeindex::type_id<T>().pretty_name(), id);
+                Utilities::Throw("No object of type {} named {} found", boost::typeindex::type_id<T>().pretty_name(), id);
             }
 
-            const auto& storage = *static_cast<const Storage<T>*>(storageMap.at(std::type_index(typeid(T))).get());
+            const auto& storage = *static_cast<const Storage<T>*>(mStorageMap.at(std::type_index(typeid(T))).get());
 
             return *storage.objects.at(id).get();
         }
@@ -90,17 +107,17 @@ namespace Mosaic::Frontend
         template <typename T>
         void Remove(const std::string& id)
         {
-            auto it = storageMap.find(std::type_index(typeid(T)));
-            if (it == storageMap.end())
+            auto it = mStorageMap.find(std::type_index(typeid(T)));
+            if (it == mStorageMap.end())
             {
-                Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
             }
 
             auto& storage = *static_cast<Storage<T>*>(it->second.get());
 
             if (not storage.objects.contains(id))
             {
-                Throw("No object named {} of type {} found in registry", id, boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("No object named {} of type {} found in registry", id, boost::typeindex::type_id<T>().pretty_name());
             }
 
             storage.objects.erase(id);
@@ -109,22 +126,22 @@ namespace Mosaic::Frontend
         template <typename T>
         void RemoveAll()
         {
-            auto it = storageMap.find(std::type_index(typeid(T)));
-            if (it == storageMap.end())
+            auto it = mStorageMap.find(std::type_index(typeid(T)));
+            if (it == mStorageMap.end())
             {
-                Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
             }
 
-            storageMap.erase(it);
+            mStorageMap.erase(it);
         }
 
         template <typename T>
         std::string GetID(const T* ptr) const
         {
-            auto it = storageMap.find(std::type_index(typeid(T)));
-            if (it == storageMap.end())
+            auto it = mStorageMap.find(std::type_index(typeid(T)));
+            if (it == mStorageMap.end())
             {
-                Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("No objects of type {} found in registry", boost::typeindex::type_id<T>().pretty_name());
             }
 
             const auto& storage = *static_cast<const Storage<T>*>(it->second.get());
@@ -137,7 +154,7 @@ namespace Mosaic::Frontend
                 }
             }
 
-            Throw("Object pointer of type {} not found in registry", boost::typeindex::type_id<T>().pretty_name());
+            Utilities::Throw("Object pointer of type {} not found in registry", boost::typeindex::type_id<T>().pretty_name());
 
             return "";
         }
@@ -145,8 +162,8 @@ namespace Mosaic::Frontend
         template <typename T>
         bool Contains(const std::string& id) const
         {
-            auto it = storageMap.find(std::type_index(typeid(T)));
-            if (it == storageMap.end())
+            auto it = mStorageMap.find(std::type_index(typeid(T)));
+            if (it == mStorageMap.end())
             {
                 return false;
             }
@@ -171,7 +188,7 @@ namespace Mosaic::Frontend
         Storage<T>& GetOrCreateStorage()
         {
             auto type = std::type_index(typeid(T));
-            auto& ptr = storageMap[type];
+            auto& ptr = mStorageMap[type];
 
             if (not ptr)
             {
@@ -181,6 +198,7 @@ namespace Mosaic::Frontend
             return *static_cast<Storage<T>*>(ptr.get());
         }
 
-        std::unordered_map<std::type_index, std::unique_ptr<IStorage>> storageMap;
+        std::unordered_map<std::type_index, std::unique_ptr<IStorage>> mStorageMap;
+        std::unordered_map<std::type_index, size_t> mNameCounters;
     };
 }

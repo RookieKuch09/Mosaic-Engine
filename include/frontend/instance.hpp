@@ -7,6 +7,7 @@ namespace Mosaic::Frontend
     class Instance
     {
     public:
+        Instance(const std::string& configPath);
         virtual ~Instance() = default;
 
         static Instance* Create();

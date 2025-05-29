@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace Mosaic::Frontend
+namespace Mosaic::Utilities
 {
     template <typename... Args>
     inline void Assert(bool condition, const std::string& message, Args&&... args)

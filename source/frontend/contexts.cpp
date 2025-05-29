@@ -121,7 +121,7 @@ namespace Mosaic::Frontend
                 }
                 else
                 {
-                    Throw("{} is already registered and cannot be deregistered", contextType);
+                    Utilities::Throw("{} is already registered and cannot be deregistered", contextType);
                 }
             }
 
@@ -131,8 +131,15 @@ namespace Mosaic::Frontend
         removeContext(mContexts, mStopQueuedContexts, "Local Context");
     }
 
+    GlobalContext::GlobalContext(const std::string& configPath)
+        : EventLayer(mEventManager, mEventManager), mRunning(true), mSettingsFile(configPath), mWindow(*this)
+    {
+    }
+
     void GlobalContext::Start()
     {
+        mSettingsFile.Open();
+
         mWindow.Start();
         mRenderer.Start();
 
@@ -141,13 +148,20 @@ namespace Mosaic::Frontend
 
     void GlobalContext::Update()
     {
-        mWindow.Update();
-        mRenderer.Update();
+        SetGlobalCallback(this, &GlobalContext::OnAppExit);
 
-        mInputManager.Update();
-        mEventManager.Update();
+        while (mRunning)
+        {
+            mLocalContextManager.Update();
 
-        mLocalContextManager.Update();
+            mInputManager.Update();
+
+            mWindow.Update();
+
+            mEventManager.Update();
+
+            mRenderer.Update();
+        }
     }
 
     void GlobalContext::Stop()
@@ -158,13 +172,13 @@ namespace Mosaic::Frontend
         mLocalContextManager.Stop();
     }
 
-    LocalContextManager& GlobalContext::GetContextManager()
+    Utilities::TOMLFile& GlobalContext::GetGlobalSettings()
     {
-        return mLocalContextManager;
+        return mSettingsFile;
     }
 
-    Registry& GlobalContext::GetRegistry()
+    void GlobalContext::OnAppExit(const ApplicationQuitEvent& event)
     {
-        return mResourceRegistry;
+        mRunning = false;
     }
 }

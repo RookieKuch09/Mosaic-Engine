@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/frontend/logging.hpp"
+#include "../../include/utilities/logging.hpp"
 
 #include <boost/type_index.hpp>
 
@@ -14,6 +14,10 @@
 
 namespace Mosaic::Frontend
 {
+    struct ApplicationQuitEvent
+    {
+    };
+
     class EventManager;
 
     class EventManager
@@ -41,7 +45,7 @@ namespace Mosaic::Frontend
             }
             else
             {
-                Throw("Subscriber {} already subscribed to event {}", boost::typeindex::type_id<TClass>().pretty_name(), boost::typeindex::type_id<T>().pretty_name());
+                Utilities::Throw("Subscriber {} already subscribed to event {}", boost::typeindex::type_id<TClass>().pretty_name(), boost::typeindex::type_id<T>().pretty_name());
             }
         }
 

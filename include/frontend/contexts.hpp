@@ -1,7 +1,8 @@
 #pragma once
 
+#include "../utilities/toml.hpp"
+
 #include "components.hpp"
-#include "events.hpp"
 #include "graphs.hpp"
 #include "inputs.hpp"
 #include "registry.hpp"
@@ -57,15 +58,17 @@ namespace Mosaic::Frontend
         std::vector<std::reference_wrapper<LocalContext>> mStopQueuedContexts;
     };
 
-    class GlobalContext
+    class GlobalContext : public EventLayer
     {
     public:
+        GlobalContext(const std::string& configPath);
+
         void Start();
         void Update();
         void Stop();
 
         template <typename T, typename... Args>
-        T& NewResource(const std::string& id, Args&... constructorParams)
+        T& NewNamedResource(const std::string& id, Args&... constructorParams)
         {
             auto resource = std::make_shared<T>(constructorParams...);
             mResourceRegistry.Add<T>(id, std::move(resource));
@@ -73,8 +76,16 @@ namespace Mosaic::Frontend
             return mResourceRegistry.Get<T>(id);
         }
 
-        LocalContextManager& GetContextManager();
-        Registry& GetRegistry();
+        template <typename T, typename... Args>
+        T& NewResource(Args&... constructorParams)
+        {
+            auto resource = std::make_shared<T>(constructorParams...);
+            auto id = mResourceRegistry.Add<T>(std::move(resource));
+
+            return mResourceRegistry.Get<T>(id);
+        }
+
+        Utilities::TOMLFile& GetGlobalSettings();
 
     private:
         EventManager mEventManager;
@@ -85,7 +96,15 @@ namespace Mosaic::Frontend
         Renderer mRenderer;
         GlobalRenderGraph mGlobalRenderGraph;
 
+        Utilities::TOMLFile mSettingsFile;
+
+        void OnAppExit(const ApplicationQuitEvent& event);
+
+        bool mRunning;
+
         friend class LocalContext;
         friend class Component;
+        friend class Window;
+        friend class WindowBackend;
     };
 }
