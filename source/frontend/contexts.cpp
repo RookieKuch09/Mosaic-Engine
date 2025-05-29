@@ -2,15 +2,15 @@
 
 namespace Mosaic::Frontend
 {
-    LocalContext::LocalContext(LocalContextManager& localContextManager)
-        : mLocalContextManager(localContextManager), mStarted(false)
+    LocalContext::LocalContext(GlobalContext& globalContext)
+        : mGlobalContext(globalContext), mStarted(false)
     {
-        mLocalContextManager.Register(this);
+        mGlobalContext.mLocalContextManager.Register(this);
     }
 
     LocalContext::~LocalContext()
     {
-        mLocalContextManager.Deregister(this);
+        mGlobalContext.mLocalContextManager.Deregister(this);
     }
 
     void LocalContext::Start()

@@ -14,7 +14,7 @@ namespace Mosaic::Frontend
     class Component : public EventLayer
     {
     public:
-        Component(LocalContext& logicContext, Registry& registry);
+        Component(LocalContext& logicContext);
         virtual ~Component();
 
         virtual void Start();
@@ -25,7 +25,7 @@ namespace Mosaic::Frontend
         Registry& ResourceRegistry;
 
     private:
-        ComponentManager& mComponentManager;
+        LocalContext& mLocalContext;
 
         bool mStarted;
 

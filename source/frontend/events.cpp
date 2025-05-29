@@ -45,13 +45,18 @@ namespace Mosaic::Frontend
         }
     }
 
-    EventLayer::EventLayer(EventManager& eventManager)
-        : mEventManager(eventManager)
+    EventLayer::EventLayer(EventManager& localEventManager, EventManager& globalEventManager)
+        : mLocalEventManager(localEventManager), mGlobalEventManager(globalEventManager)
     {
     }
 
-    void EventLayer::RevokeCallbacks(void* subscriber)
+    void EventLayer::RevokeLocalCallbacks(void* subscriber)
     {
-        mEventManager.RevokeCallbacks(subscriber);
+        mLocalEventManager.RevokeCallbacks(subscriber);
+    }
+
+    void EventLayer::RevokeGlobalCallbacks(void* subscriber)
+    {
+        mGlobalEventManager.RevokeCallbacks(subscriber);
     }
 }

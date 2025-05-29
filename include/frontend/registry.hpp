@@ -138,6 +138,8 @@ namespace Mosaic::Frontend
             }
 
             Throw("Object pointer of type {} not found in registry", boost::typeindex::type_id<T>().pretty_name());
+
+            return "";
         }
 
         template <typename T>

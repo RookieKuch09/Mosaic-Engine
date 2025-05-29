@@ -13,11 +13,12 @@
 namespace Mosaic::Frontend
 {
     class LocalContextManager;
+    class GlobalContext;
 
     class LocalContext
     {
     public:
-        LocalContext(LocalContextManager& localContextManager);
+        LocalContext(GlobalContext& globalContext);
         ~LocalContext();
 
         void Start();
@@ -28,7 +29,7 @@ namespace Mosaic::Frontend
         ComponentManager mComponentManager;
         EventManager mEventManager;
 
-        LocalContextManager& mLocalContextManager;
+        GlobalContext& mGlobalContext;
 
         bool mStarted;
 
@@ -83,5 +84,8 @@ namespace Mosaic::Frontend
         InputManager mInputManager;
         Renderer mRenderer;
         GlobalRenderGraph mGlobalRenderGraph;
+
+        friend class LocalContext;
+        friend class Component;
     };
 }

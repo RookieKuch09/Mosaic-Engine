@@ -4,15 +4,15 @@
 
 namespace Mosaic::Frontend
 {
-    Component::Component(LocalContext& context, Registry& registry)
-        : mComponentManager(context.mComponentManager), ResourceRegistry(registry), EventLayer(context.mEventManager), mStarted(false)
+    Component::Component(LocalContext& context)
+        : mLocalContext(context), ResourceRegistry(context.mGlobalContext.mResourceRegistry), EventLayer(context.mEventManager, context.mGlobalContext.mEventManager), mStarted(false)
     {
-        mComponentManager.Register(this);
+        mLocalContext.mComponentManager.Register(this);
     }
 
     Component::~Component()
     {
-        mComponentManager.Deregister(this);
+        mLocalContext.mComponentManager.Deregister(this);
     }
 
     void Component::Start()

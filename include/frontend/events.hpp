@@ -69,24 +69,39 @@ namespace Mosaic::Frontend
     class EventLayer
     {
     public:
-        EventLayer(EventManager& eventManager);
+        EventLayer(EventManager& eventManager, EventManager& globalEventManager);
         virtual ~EventLayer() = default;
 
         template <typename T, typename TClass>
-        void SetCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        void SetLocalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
         {
-            mEventManager.SetCallback(subscriber, callback);
+            mLocalEventManager.SetCallback(subscriber, callback);
         }
 
-        void RevokeCallbacks(void* subscriber);
+        void RevokeLocalCallbacks(void* subscriber);
 
         template <typename T>
-        void EmitEvent(const T& event)
+        void EmitLocalEvent(const T& event)
         {
-            mEventManager.EmitEvent(event);
+            mLocalEventManager.EmitEvent(event);
+        }
+
+        template <typename T, typename TClass>
+        void SetGlobalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        {
+            mGlobalEventManager.SetCallback(subscriber, callback);
+        }
+
+        void RevokeGlobalCallbacks(void* subscriber);
+
+        template <typename T>
+        void EmitGlobalEvent(const T& event)
+        {
+            mGlobalEventManager.EmitEvent(event);
         }
 
     private:
-        EventManager& mEventManager;
+        EventManager& mLocalEventManager;
+        EventManager& mGlobalEventManager;
     };
 }
