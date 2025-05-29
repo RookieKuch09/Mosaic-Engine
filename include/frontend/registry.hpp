@@ -43,22 +43,26 @@ namespace Mosaic::Frontend
             return Handle<T>{id};
         }
 
-        template <typename T>
-        void Add(const std::string& id, std::shared_ptr<T> object)
+        template <typename T, typename... Args>
+        void Add(const std::string& id, Args&... args)
         {
             if (Contains<T>(id))
             {
                 Utilities::Throw("Object of type {} named {} already exists", boost::typeindex::type_id<T>().pretty_name(), id);
             }
 
+            auto resource = std::make_shared<T>(args...);
+
             auto& storage = GetOrCreateStorage<T>();
 
-            storage.objects[id] = std::move(object);
+            storage.objects[id] = std::move(resource);
         }
 
-        template <typename T>
-        std::string Add(std::shared_ptr<T> object)
+        template <typename T, typename... Args>
+        std::string Add(Args&... args)
         {
+            auto resource = std::make_shared<T>(args...);
+
             auto& storage = GetOrCreateStorage<T>();
             auto& counter = mNameCounters[std::type_index(typeid(T))];
 
@@ -68,7 +72,7 @@ namespace Mosaic::Frontend
                 id = std::format("{}#{}", boost::typeindex::type_id<T>().pretty_name(), counter++);
             } while (storage.objects.contains(id));
 
-            storage.objects[id] = std::move(object);
+            storage.objects[id] = std::move(resource);
 
             return id;
         }
@@ -121,6 +125,15 @@ namespace Mosaic::Frontend
             }
 
             storage.objects.erase(id);
+
+            LogCurrentResources<T>();
+        }
+
+        template <typename T>
+        void Remove(const T& object)
+        {
+            const std::string id = GetID(&object);
+            Remove<T>(id);
         }
 
         template <typename T>
@@ -155,8 +168,6 @@ namespace Mosaic::Frontend
             }
 
             Utilities::Throw("Object pointer of type {} not found in registry", boost::typeindex::type_id<T>().pretty_name());
-
-            return "";
         }
 
         template <typename T>
@@ -183,6 +194,25 @@ namespace Mosaic::Frontend
         {
             std::unordered_map<std::string, std::shared_ptr<T>> objects;
         };
+
+        template <typename T>
+        void LogCurrentResources() const
+        {
+            try
+            {
+                const auto& storage = GetAll<T>();
+                std::string resourceList = "Current resources of type " + std::string(boost::typeindex::type_id<T>().pretty_name()) + ":\n";
+                for (const auto& [id, _] : storage)
+                {
+                    resourceList += " - " + id + "\n";
+                }
+                Utilities::LogNotice("{}", resourceList);
+            }
+            catch (...)
+            {
+                Utilities::LogNotice("No resources of type {} found", boost::typeindex::type_id<T>().pretty_name());
+            }
+        }
 
         template <typename T>
         Storage<T>& GetOrCreateStorage()

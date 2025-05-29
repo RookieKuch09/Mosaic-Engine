@@ -9,8 +9,6 @@
 #include "renderer.hpp"
 #include "window.hpp"
 
-#include <functional>
-
 namespace Mosaic::Frontend
 {
     class LocalContextManager;
@@ -27,6 +25,8 @@ namespace Mosaic::Frontend
         void Stop();
 
     private:
+        void RemoveFromRegistry();
+
         ComponentManager mComponentManager;
         EventManager mEventManager;
 
@@ -36,7 +36,7 @@ namespace Mosaic::Frontend
 
         friend class LocalContextManager;
         friend class GlobalContext;
-        friend class Component;
+        friend class ComponentBase;
     };
 
     class LocalContextManager
@@ -49,19 +49,22 @@ namespace Mosaic::Frontend
         void Register(LocalContext* context);
         void Deregister(LocalContext* context);
 
+        void Cleanup();
+
     private:
         void FlushQueuedStartContexts();
         void FlushQueuedStopContexts();
 
-        std::vector<std::reference_wrapper<LocalContext>> mContexts;
-        std::vector<std::reference_wrapper<LocalContext>> mStartQueuedContexts;
-        std::vector<std::reference_wrapper<LocalContext>> mStopQueuedContexts;
+        std::vector<LocalContext*> mContexts;
+        std::vector<LocalContext*> mStartQueuedContexts;
+        std::vector<LocalContext*> mStopQueuedContexts;
     };
 
     class GlobalContext : public EventLayer
     {
     public:
         GlobalContext(const std::string& configPath);
+        ~GlobalContext() override = default;
 
         void Start();
         void Update();
@@ -70,8 +73,7 @@ namespace Mosaic::Frontend
         template <typename T, typename... Args>
         T& NewNamedResource(const std::string& id, Args&... constructorParams)
         {
-            auto resource = std::make_shared<T>(constructorParams...);
-            mResourceRegistry.Add<T>(id, std::move(resource));
+            mResourceRegistry.Add<T>(id, constructorParams...);
 
             return mResourceRegistry.Get<T>(id);
         }
@@ -79,8 +81,7 @@ namespace Mosaic::Frontend
         template <typename T, typename... Args>
         T& NewResource(Args&... constructorParams)
         {
-            auto resource = std::make_shared<T>(constructorParams...);
-            auto id = mResourceRegistry.Add<T>(std::move(resource));
+            auto id = mResourceRegistry.Add<T>(constructorParams...);
 
             return mResourceRegistry.Get<T>(id);
         }
@@ -103,7 +104,7 @@ namespace Mosaic::Frontend
         bool mRunning;
 
         friend class LocalContext;
-        friend class Component;
+        friend class ComponentBase;
         friend class Window;
         friend class WindowBackend;
     };

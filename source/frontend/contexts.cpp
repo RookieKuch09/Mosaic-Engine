@@ -11,6 +11,9 @@ namespace Mosaic::Frontend
     LocalContext::~LocalContext()
     {
         mGlobalContext.mLocalContextManager.Deregister(this);
+        mGlobalContext.mResourceRegistry.Remove(*this);
+
+        Utilities::LogNotice("Deleting Context");
     }
 
     void LocalContext::Start()
@@ -29,6 +32,13 @@ namespace Mosaic::Frontend
         mComponentManager.Stop();
     }
 
+    void LocalContext::RemoveFromRegistry()
+    {
+        Utilities::LogNotice("Deleting Context");
+        mComponentManager.Cleanup();
+        mGlobalContext.mResourceRegistry.Remove(*this);
+    }
+
     void LocalContextManager::Start()
     {
         FlushQueuedStartContexts();
@@ -36,10 +46,8 @@ namespace Mosaic::Frontend
 
         for (const auto& context : mContexts)
         {
-            auto& ctx = context.get();
-
-            ctx.mStarted = true;
-            ctx.Start();
+            context->mStarted = true;
+            context->Start();
         }
     }
 
@@ -50,15 +58,13 @@ namespace Mosaic::Frontend
 
         for (const auto& context : mContexts)
         {
-            auto& ctx = context.get();
-
-            if (not ctx.mStarted)
+            if (not context->mStarted)
             {
-                ctx.mStarted = true;
-                ctx.Start();
+                context->mStarted = true;
+                context->Start();
             }
 
-            ctx.Update();
+            context->Update();
         }
     }
 
@@ -66,33 +72,56 @@ namespace Mosaic::Frontend
     {
         for (const auto& context : mContexts)
         {
-            auto& ctx = context.get();
-
-            if (ctx.mStarted)
+            if (context->mStarted)
             {
-                ctx.Stop();
+                context->Stop();
             }
         }
 
         for (const auto& context : mContexts)
         {
-            auto& ctx = context.get();
-
-            if (ctx.mStarted)
+            if (context->mStarted)
             {
-                ctx.Stop();
+                context->Stop();
             }
         }
     }
 
     void LocalContextManager::Register(LocalContext* context)
     {
-        mStartQueuedContexts.push_back(std::ref(*context));
+        mStartQueuedContexts.push_back(context);
     }
 
     void LocalContextManager::Deregister(LocalContext* context)
     {
-        mStopQueuedContexts.push_back(std::ref(*context));
+        mStopQueuedContexts.push_back(context);
+    }
+
+    void LocalContextManager::Cleanup()
+    {
+        for (LocalContext* context : mContexts)
+        {
+            if (context)
+            {
+                context->RemoveFromRegistry();
+            }
+        }
+
+        for (LocalContext* context : mStartQueuedContexts)
+        {
+            if (context)
+            {
+                context->RemoveFromRegistry();
+            }
+        }
+
+        for (LocalContext* context : mStopQueuedContexts)
+        {
+            if (context)
+            {
+                context->RemoveFromRegistry();
+            }
+        }
     }
 
     void LocalContextManager::FlushQueuedStartContexts()
@@ -110,7 +139,7 @@ namespace Mosaic::Frontend
             {
                 auto match = [&](const auto& item)
                 {
-                    return &item.get() == &context.get();
+                    return item == context;
                 };
 
                 auto it = std::find_if(vec.begin(), vec.end(), match);
@@ -170,6 +199,7 @@ namespace Mosaic::Frontend
         mRenderer.Stop();
 
         mLocalContextManager.Stop();
+        mLocalContextManager.Cleanup();
     }
 
     Utilities::TOMLFile& GlobalContext::GetGlobalSettings()

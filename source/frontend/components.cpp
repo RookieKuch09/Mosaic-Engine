@@ -1,30 +1,20 @@
 #include "../../include/frontend/components.hpp"
 #include "../../include/frontend/contexts.hpp"
+
 #include "../../include/utilities/logging.hpp"
 
 namespace Mosaic::Frontend
 {
-    Component::Component(LocalContext& context)
-        : mLocalContext(context), ResourceRegistry(context.mGlobalContext.mResourceRegistry), EventLayer(context.mEventManager, context.mGlobalContext.mEventManager), mStarted(false)
+    ComponentBase::ComponentBase(LocalContext& localContext)
+        : mLocalContext(localContext), ResourceRegistry(localContext.mGlobalContext.mResourceRegistry), EventLayer(localContext.mEventManager, localContext.mGlobalContext.mEventManager), mStarted(false)
     {
         mLocalContext.mComponentManager.Register(this);
     }
 
-    Component::~Component()
+    ComponentBase::~ComponentBase()
     {
+        Utilities::LogNotice("Deleting ComponentBase");
         mLocalContext.mComponentManager.Deregister(this);
-    }
-
-    void Component::Start()
-    {
-    }
-
-    void Component::Update()
-    {
-    }
-
-    void Component::Stop()
-    {
     }
 
     void ComponentManager::Start()
@@ -34,10 +24,8 @@ namespace Mosaic::Frontend
 
         for (const auto& component : mComponents)
         {
-            auto& cmp = component.get();
-
-            cmp.mStarted = true;
-            cmp.Start();
+            component->mStarted = true;
+            component->Start();
         }
     }
 
@@ -48,45 +36,71 @@ namespace Mosaic::Frontend
 
         for (const auto& component : mComponents)
         {
-            auto& cmp = component.get();
-
-            if (not cmp.mStarted)
+            if (not component->mStarted)
             {
-                cmp.mStarted = true;
-                cmp.Start();
+                component->mStarted = true;
+                component->Start();
             }
 
-            cmp.Update();
+            component->Update();
         }
     }
 
     void ComponentManager::Stop()
     {
+        FlushQueuedStartComponents();
+        FlushQueuedStopComponents();
+
         for (const auto& component : mComponents)
         {
-            auto& cmp = component.get();
-
-            if (cmp.mStarted)
+            if (component->mStarted)
             {
-                cmp.Stop();
+                component->Stop();
             }
         }
     }
 
-    void ComponentManager::Register(Component* component)
+    void ComponentManager::Register(ComponentBase* component)
     {
-        mComponents.push_back(std::ref(*component));
+        mComponents.push_back(component);
     }
 
-    void ComponentManager::Deregister(Component* logicContext)
+    void ComponentManager::Deregister(ComponentBase* component)
     {
-        mStopQueuedComponents.push_back(std::ref(*logicContext));
+        mStopQueuedComponents.push_back(component);
+    }
+
+    void ComponentManager::Cleanup()
+    {
+
+        for (ComponentBase* component : mComponents)
+        {
+            if (component)
+            {
+                component->RemoveFromRegistry();
+            }
+        }
+
+        for (ComponentBase* component : mStartQueuedComponents)
+        {
+            if (component)
+            {
+                component->RemoveFromRegistry();
+            }
+        }
+
+        for (ComponentBase* component : mStopQueuedComponents)
+        {
+            if (component)
+            {
+                component->RemoveFromRegistry();
+            }
+        }
     }
 
     void ComponentManager::FlushQueuedStartComponents()
     {
         std::move(mStartQueuedComponents.begin(), mStartQueuedComponents.end(), std::back_inserter(mComponents));
-
         mStartQueuedComponents.clear();
     }
 
@@ -94,14 +108,9 @@ namespace Mosaic::Frontend
     {
         auto removeContext = [](auto& vec, auto& queue, const char* contextType)
         {
-            for (const auto& context : queue)
+            for (const auto* component : queue)
             {
-                auto match = [&](const auto& item)
-                {
-                    return &item.get() == &context.get();
-                };
-
-                auto it = std::find_if(vec.begin(), vec.end(), match);
+                auto it = std::find(vec.begin(), vec.end(), component);
 
                 if (it != vec.end())
                 {
@@ -109,7 +118,7 @@ namespace Mosaic::Frontend
                 }
                 else
                 {
-                    Utilities::Throw("{} is already registered and cannot be deregistered", contextType);
+                    Utilities::Throw("{} is not registered and cannot be deregistered", contextType);
                 }
             }
 

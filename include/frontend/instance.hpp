@@ -10,7 +10,7 @@ namespace Mosaic::Frontend
         Instance(const std::string& configPath);
         virtual ~Instance() = default;
 
-        static Instance* Create();
+        static std::unique_ptr<Instance> Create();
 
         virtual void Setup() = 0;
 
