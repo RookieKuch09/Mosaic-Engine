@@ -17,9 +17,6 @@ namespace Mosaic::Frontend
         std::uint32_t Run();
 
     protected:
-        template <typename T>
-        T& CreateResource(const std::string& id);
-
         GlobalContext GlobalContext;
     };
 }

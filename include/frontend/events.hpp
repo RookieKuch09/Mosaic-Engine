@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../include/utilities/logging.hpp"
+#include "../utilities/logging.hpp"
 
 #include <boost/type_index.hpp>
 

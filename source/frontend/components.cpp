@@ -1,32 +1,53 @@
 #include "../../include/frontend/components.hpp"
 #include "../../include/frontend/contexts.hpp"
 
-#include "../../include/utilities/logging.hpp"
-
 namespace Mosaic::Frontend
 {
-    ComponentBase::ComponentBase(LocalContext& localContext)
-        : mLocalContext(localContext), ResourceRegistry(localContext.mGlobalContext.mResourceRegistry), EventLayer(localContext.mEventManager, localContext.mGlobalContext.mEventManager), mStarted(false)
+    Component::Component(Mosaic::Frontend::LocalContext& localContext, Mosaic::Frontend::GlobalContext& globalContext)
+        : EventLayer(localContext.mEventManager, globalContext.mEventManager), LocalContext(localContext), GlobalContext(globalContext), LocalEventManager(localContext.mEventManager), GlobalEventManager(globalContext.mEventManager)
     {
-        mLocalContext.mComponentManager.Register(this);
     }
 
-    ComponentBase::~ComponentBase()
+    Component::~Component()
     {
-        Utilities::LogNotice("Deleting ComponentBase");
-        mLocalContext.mComponentManager.Deregister(this);
+    }
+
+    void Component::Start()
+    {
+    }
+
+    void Component::Update()
+    {
+    }
+
+    void Component::Stop()
+    {
+    }
+
+    ComponentManager& ComponentManager::operator=(ComponentManager&& other) noexcept
+    {
+        if (this != &other)
+        {
+            mOwnedComponents = std::move(other.mOwnedComponents);
+            mPendingComponents = std::move(other.mPendingComponents);
+            mComponents = std::move(other.mComponents);
+            mStartQueue = std::move(other.mStartQueue);
+            mStopQueue = std::move(other.mStopQueue);
+            mComponentLookup = std::move(other.mComponentLookup);
+        }
+
+        return *this;
+    }
+
+    ComponentManager::ComponentManager(LocalContext& localContext, GlobalContext& globalContext)
+        : mGlobalContext(globalContext), mLocalContext(localContext)
+    {
     }
 
     void ComponentManager::Start()
     {
         FlushQueuedStartComponents();
         FlushQueuedStopComponents();
-
-        for (const auto& component : mComponents)
-        {
-            component->mStarted = true;
-            component->Start();
-        }
     }
 
     void ComponentManager::Update()
@@ -34,97 +55,68 @@ namespace Mosaic::Frontend
         FlushQueuedStartComponents();
         FlushQueuedStopComponents();
 
-        for (const auto& component : mComponents)
+        for (auto* component : mComponents)
         {
-            if (not component->mStarted)
-            {
-                component->mStarted = true;
-                component->Start();
-            }
-
             component->Update();
         }
     }
 
     void ComponentManager::Stop()
     {
-        FlushQueuedStartComponents();
+        for (auto* component : mComponents)
+        {
+            mStopQueue.push_back(component);
+        }
+
         FlushQueuedStopComponents();
-
-        for (const auto& component : mComponents)
-        {
-            if (component->mStarted)
-            {
-                component->Stop();
-            }
-        }
-    }
-
-    void ComponentManager::Register(ComponentBase* component)
-    {
-        mComponents.push_back(component);
-    }
-
-    void ComponentManager::Deregister(ComponentBase* component)
-    {
-        mStopQueuedComponents.push_back(component);
-    }
-
-    void ComponentManager::Cleanup()
-    {
-
-        for (ComponentBase* component : mComponents)
-        {
-            if (component)
-            {
-                component->RemoveFromRegistry();
-            }
-        }
-
-        for (ComponentBase* component : mStartQueuedComponents)
-        {
-            if (component)
-            {
-                component->RemoveFromRegistry();
-            }
-        }
-
-        for (ComponentBase* component : mStopQueuedComponents)
-        {
-            if (component)
-            {
-                component->RemoveFromRegistry();
-            }
-        }
     }
 
     void ComponentManager::FlushQueuedStartComponents()
     {
-        std::move(mStartQueuedComponents.begin(), mStartQueuedComponents.end(), std::back_inserter(mComponents));
-        mStartQueuedComponents.clear();
+        for (auto* component : mStartQueue)
+        {
+            component->Start();
+            mComponents.push_back(component);
+        }
+
+        mStartQueue.clear();
+
+        for (auto& owned : mPendingComponents)
+        {
+            mOwnedComponents.emplace_back(std::move(owned));
+        }
+
+        mPendingComponents.clear();
     }
 
     void ComponentManager::FlushQueuedStopComponents()
     {
-        auto removeContext = [](auto& vec, auto& queue, const char* contextType)
+        for (auto* component : mStopQueue)
         {
-            for (const auto* component : queue)
+            auto checkPair = [&](const auto& pair)
             {
-                auto it = std::find(vec.begin(), vec.end(), component);
+                return pair.second == component;
+            };
 
-                if (it != vec.end())
-                {
-                    vec.erase(it);
-                }
-                else
-                {
-                    Utilities::Throw("{} is not registered and cannot be deregistered", contextType);
-                }
+            auto checkPtr = [&](const std::unique_ptr<Component>& ptr)
+            {
+                return ptr.get() == component;
+            };
+
+            component->Stop();
+
+            mComponents.erase(std::remove(mComponents.begin(), mComponents.end(), component), mComponents.end());
+
+            auto it = std::find_if(mComponentLookup.begin(), mComponentLookup.end(), checkPair);
+
+            if (it != mComponentLookup.end())
+            {
+                mComponentLookup.erase(it);
             }
 
-            queue.clear();
-        };
+            mOwnedComponents.erase(std::remove_if(mOwnedComponents.begin(), mOwnedComponents.end(), checkPtr), mOwnedComponents.end());
+        }
 
-        removeContext(mComponents, mStopQueuedComponents, "Component");
+        mStopQueue.clear();
     }
 }

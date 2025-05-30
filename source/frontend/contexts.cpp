@@ -3,17 +3,31 @@
 namespace Mosaic::Frontend
 {
     LocalContext::LocalContext(GlobalContext& globalContext)
-        : mGlobalContext(globalContext), mStarted(false)
+        : mGlobalContext(globalContext), mComponentManager(*this, globalContext), mStarted(false)
     {
-        mGlobalContext.mLocalContextManager.Register(this);
+    }
+
+    LocalContext::LocalContext(LocalContext&& other) noexcept
+        : mComponentManager(std::move(other.mComponentManager)), mEventManager(std::move(other.mEventManager)), mGlobalContext(other.mGlobalContext), mStarted(other.mStarted)
+    {
+        other.mStarted = false;
+    }
+
+    LocalContext& LocalContext::operator=(LocalContext&& other) noexcept
+    {
+        if (this != &other)
+        {
+            mComponentManager = std::move(other.mComponentManager);
+            mEventManager = std::move(other.mEventManager);
+
+            mStarted = other.mStarted;
+            other.mStarted = false;
+        }
+        return *this;
     }
 
     LocalContext::~LocalContext()
     {
-        mGlobalContext.mLocalContextManager.Deregister(this);
-        mGlobalContext.mResourceRegistry.Remove(*this);
-
-        Utilities::LogNotice("Deleting Context");
     }
 
     void LocalContext::Start()
@@ -32,11 +46,83 @@ namespace Mosaic::Frontend
         mComponentManager.Stop();
     }
 
-    void LocalContext::RemoveFromRegistry()
+    LocalContextManager::LocalContextManager(GlobalContext& globalContext)
+        : mGlobalContext(globalContext)
     {
-        Utilities::LogNotice("Deleting Context");
-        mComponentManager.Cleanup();
-        mGlobalContext.mResourceRegistry.Remove(*this);
+    }
+
+    LocalContext& LocalContextManager::NewContext(const std::string& tag)
+    {
+        if (mContextLookup.find(tag) != mContextLookup.end())
+        {
+            Utilities::Throw("LocalContext with tag '{}' already exists", tag);
+        }
+
+        mPendingContexts.emplace_back(mGlobalContext);
+        LocalContext& context = mPendingContexts.back();
+
+        mStartQueue.push_back(&context);
+        mContextLookup[tag] = &context;
+
+        return context;
+    }
+
+    LocalContext& LocalContextManager::GetContext(const std::string& tag)
+    {
+        auto it = mContextLookup.find(tag);
+
+        if (it == mContextLookup.end() or not it->second)
+        {
+            Utilities::Throw("No LocalContext with tag {} found", tag);
+        }
+
+        return *it->second;
+    }
+
+    std::string LocalContextManager::GetContextTag(LocalContext& context)
+    {
+        for (const auto& [tag, ptr] : mContextLookup)
+        {
+            if (ptr == &context)
+            {
+                return tag;
+            }
+        }
+
+        Utilities::Throw("LocalContext not registered with the manager");
+    }
+
+    void LocalContextManager::RemoveContextByTag(const std::string& tag)
+    {
+        auto it = mContextLookup.find(tag);
+
+        if (it == mContextLookup.end() or not it->second)
+        {
+            Utilities::Throw("No LocalContext with tag {} found", tag);
+        }
+
+        LocalContext* context = it->second;
+
+        mStopQueue.push_back(context);
+    }
+
+    void LocalContextManager::RemoveContextByInstance(LocalContext& context)
+    {
+        auto match = [&](const LocalContext& c)
+        {
+            return &c == &context;
+        };
+
+        auto owned = std::find_if(mOwnedContexts.begin(), mOwnedContexts.end(), match);
+
+        if (owned != mOwnedContexts.end())
+        {
+            mStopQueue.push_back(&context);
+        }
+        else
+        {
+            Utilities::Throw("Attempt to remove a context not owned by this LocalContextManager");
+        }
     }
 
     void LocalContextManager::Start()
@@ -87,81 +173,82 @@ namespace Mosaic::Frontend
         }
     }
 
-    void LocalContextManager::Register(LocalContext* context)
-    {
-        mStartQueuedContexts.push_back(context);
-    }
-
-    void LocalContextManager::Deregister(LocalContext* context)
-    {
-        mStopQueuedContexts.push_back(context);
-    }
-
-    void LocalContextManager::Cleanup()
-    {
-        for (LocalContext* context : mContexts)
-        {
-            if (context)
-            {
-                context->RemoveFromRegistry();
-            }
-        }
-
-        for (LocalContext* context : mStartQueuedContexts)
-        {
-            if (context)
-            {
-                context->RemoveFromRegistry();
-            }
-        }
-
-        for (LocalContext* context : mStopQueuedContexts)
-        {
-            if (context)
-            {
-                context->RemoveFromRegistry();
-            }
-        }
-    }
-
     void LocalContextManager::FlushQueuedStartContexts()
     {
-        std::move(mStartQueuedContexts.begin(), mStartQueuedContexts.end(), std::back_inserter(mContexts));
+        for (auto& context : mStartQueue)
+        {
+            context->Start();
+            mContexts.push_back(context);
+        }
 
-        mStartQueuedContexts.clear();
+        mStartQueue.clear();
+
+        for (auto& owned : mPendingContexts)
+        {
+            mOwnedContexts.emplace_back(std::move(owned));
+        }
+
+        mPendingContexts.clear();
     }
 
     void LocalContextManager::FlushQueuedStopContexts()
     {
-        auto removeContext = [](auto& vec, auto& queue, const char* contextType)
+        for (auto& context : mStopQueue)
         {
-            for (const auto& context : queue)
+            auto checkPair = [&](auto& pair)
             {
-                auto match = [&](const auto& item)
-                {
-                    return item == context;
-                };
+                return pair.second == context;
+            };
 
-                auto it = std::find_if(vec.begin(), vec.end(), match);
+            auto checkRef = [&](LocalContext& ref)
+            {
+                return &ref == context;
+            };
 
-                if (it != vec.end())
-                {
-                    vec.erase(it);
-                }
-                else
-                {
-                    Utilities::Throw("{} is already registered and cannot be deregistered", contextType);
-                }
+            context->Stop();
+
+            mContexts.erase(std::remove(mContexts.begin(), mContexts.end(), context), mContexts.end());
+
+            auto it = std::find_if(mContextLookup.begin(), mContextLookup.end(), checkPair);
+
+            if (it != mContextLookup.end())
+            {
+                mContextLookup.erase(it);
             }
 
-            queue.clear();
-        };
+            mOwnedContexts.erase(std::remove_if(mOwnedContexts.begin(), mOwnedContexts.end(), checkRef), mOwnedContexts.end());
+        }
 
-        removeContext(mContexts, mStopQueuedContexts, "Local Context");
+        mStopQueue.clear();
+    }
+
+    LocalContext& GlobalContext::NewContext(const std::string& id)
+    {
+        return mLocalContextManager.NewContext(id);
+    }
+
+    LocalContext& GlobalContext::GetContext(const std::string& tag)
+    {
+        return mLocalContextManager.GetContext(tag);
+    }
+
+    std::string GlobalContext::GetContextTag(LocalContext& context)
+    {
+        return mLocalContextManager.GetContextTag(context);
+    }
+
+    void GlobalContext::RemoveContextByTag(const std::string& tag)
+    {
+        mLocalContextManager.RemoveContextByTag(tag);
+    }
+
+    void GlobalContext::RemoveContextByInstance(LocalContext& context)
+    {
+        mLocalContextManager.RemoveContextByInstance(context);
     }
 
     GlobalContext::GlobalContext(const std::string& configPath)
-        : EventLayer(mEventManager, mEventManager), mRunning(true), mSettingsFile(configPath), mWindow(*this)
+        : EventLayer(mEventManager, mEventManager), mRunning(true), mSettingsFile(configPath), mLocalContextManager(*this), mWindow(*this)
     {
     }
 
@@ -199,7 +286,6 @@ namespace Mosaic::Frontend
         mRenderer.Stop();
 
         mLocalContextManager.Stop();
-        mLocalContextManager.Cleanup();
     }
 
     Utilities::TOMLFile& GlobalContext::GetGlobalSettings()

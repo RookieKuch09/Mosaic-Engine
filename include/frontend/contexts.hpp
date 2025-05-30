@@ -5,7 +5,6 @@
 #include "components.hpp"
 #include "graphs.hpp"
 #include "inputs.hpp"
-#include "registry.hpp"
 #include "renderer.hpp"
 #include "window.hpp"
 
@@ -20,12 +19,48 @@ namespace Mosaic::Frontend
         LocalContext(GlobalContext& globalContext);
         ~LocalContext();
 
+        LocalContext(const LocalContext&) = delete;
+        LocalContext& operator=(const LocalContext&) = delete;
+
+        LocalContext(LocalContext&&) noexcept;
+        LocalContext& operator=(LocalContext&&) noexcept;
+
+        void NewComponent(const std::string& tag);
+
+        template <typename T, typename... Args>
+        void NewComponent(const std::string& tag, Args&&... args)
+        {
+            mComponentManager.NewComponent<T>(tag, std::forward<Args>(args)...);
+        }
+
+        template <typename T>
+        T& GetComponent(const std::string& tag)
+        {
+            return mComponentManager.GetComponentInstance<T>(tag);
+        }
+
+        template <typename T>
+        std::string GetComponentTag(T& component)
+        {
+            return mComponentManager.GetComponentTag(component);
+        }
+
+        template <typename T>
+        void RemoveComponent(const std::string& tag)
+        {
+            mComponentManager.RemoveComponentByTag<T>(tag);
+        }
+
+        template <typename T>
+        void RemoveComponent(T& component)
+        {
+            mComponentManager.RemoveComponentByInstance(component);
+        }
+
+    private:
         void Start();
         void Update();
         void Stop();
-
-    private:
-        void RemoveFromRegistry();
 
         ComponentManager mComponentManager;
         EventManager mEventManager;
@@ -35,62 +70,74 @@ namespace Mosaic::Frontend
         bool mStarted;
 
         friend class LocalContextManager;
-        friend class GlobalContext;
-        friend class ComponentBase;
+        friend class Component;
     };
 
     class LocalContextManager
     {
     public:
+        LocalContext& NewContext(const std::string& tag);
+
+        LocalContext& GetContext(const std::string& tag);
+
+        std::string GetContextTag(LocalContext& context);
+
+        void RemoveContextByTag(const std::string& tag);
+
+        void RemoveContextByInstance(LocalContext& context);
+
+    private:
+        LocalContextManager(GlobalContext& globalContext);
+
         void Start();
         void Update();
         void Stop();
 
-        void Register(LocalContext* context);
-        void Deregister(LocalContext* context);
-
-        void Cleanup();
-
-    private:
         void FlushQueuedStartContexts();
         void FlushQueuedStopContexts();
 
+        GlobalContext& mGlobalContext;
+
+        std::vector<LocalContext> mOwnedContexts;
+        std::vector<LocalContext> mPendingContexts;
+
         std::vector<LocalContext*> mContexts;
-        std::vector<LocalContext*> mStartQueuedContexts;
-        std::vector<LocalContext*> mStopQueuedContexts;
+        std::vector<LocalContext*> mStartQueue;
+        std::vector<LocalContext*> mStopQueue;
+
+        std::unordered_map<std::string, LocalContext*> mContextLookup;
+
+        friend class LocalContext;
+        friend class GlobalContext;
     };
 
     class GlobalContext : public EventLayer
     {
     public:
-        GlobalContext(const std::string& configPath);
         ~GlobalContext() override = default;
+
+        LocalContext& NewContext(const std::string& tag);
+
+        LocalContext& GetContext(const std::string& tag);
+
+        std::string GetContextTag(LocalContext& context);
+
+        void RemoveContextByTag(const std::string& tag);
+
+        void RemoveContextByInstance(LocalContext& context);
+
+    private:
+        GlobalContext(const std::string& configPath);
 
         void Start();
         void Update();
         void Stop();
 
-        template <typename T, typename... Args>
-        T& NewNamedResource(const std::string& id, Args&... constructorParams)
-        {
-            mResourceRegistry.Add<T>(id, constructorParams...);
-
-            return mResourceRegistry.Get<T>(id);
-        }
-
-        template <typename T, typename... Args>
-        T& NewResource(Args&... constructorParams)
-        {
-            auto id = mResourceRegistry.Add<T>(constructorParams...);
-
-            return mResourceRegistry.Get<T>(id);
-        }
-
         Utilities::TOMLFile& GetGlobalSettings();
 
-    private:
+        void OnAppExit(const ApplicationQuitEvent& event);
+
         EventManager mEventManager;
-        Registry mResourceRegistry;
         LocalContextManager mLocalContextManager;
         Window mWindow;
         InputManager mInputManager;
@@ -99,13 +146,12 @@ namespace Mosaic::Frontend
 
         Utilities::TOMLFile mSettingsFile;
 
-        void OnAppExit(const ApplicationQuitEvent& event);
-
         bool mRunning;
 
         friend class LocalContext;
-        friend class ComponentBase;
+        friend class Component;
         friend class Window;
         friend class WindowBackend;
+        friend class Instance;
     };
 }
