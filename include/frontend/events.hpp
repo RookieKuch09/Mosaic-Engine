@@ -27,7 +27,7 @@ namespace Mosaic::Frontend
 
     private:
         template <typename T, typename TClass>
-        void SetCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        inline void SetCallback(TClass* subscriber, void (TClass::*callback)(const T&))
         {
             auto call = [subscriber, callback](const std::any& event)
             {
@@ -52,7 +52,7 @@ namespace Mosaic::Frontend
         void RevokeCallbacks(void* subscriber);
 
         template <typename T>
-        void EmitEvent(const T& event)
+        inline void EmitEvent(const T& event)
         {
             mEventQueue[typeid(T)].push(event);
         }
@@ -77,7 +77,7 @@ namespace Mosaic::Frontend
         virtual ~EventLayer() = default;
 
         template <typename T, typename TClass>
-        void SetLocalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        inline void SetLocalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
         {
             mLocalEventManager.SetCallback(subscriber, callback);
         }
@@ -85,13 +85,13 @@ namespace Mosaic::Frontend
         void RevokeLocalCallbacks(void* subscriber);
 
         template <typename T>
-        void EmitLocalEvent(const T& event)
+        inline void EmitLocalEvent(const T& event)
         {
             mLocalEventManager.EmitEvent(event);
         }
 
         template <typename T, typename TClass>
-        void SetGlobalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
+        inline void SetGlobalCallback(TClass* subscriber, void (TClass::*callback)(const T&))
         {
             mGlobalEventManager.SetCallback(subscriber, callback);
         }
@@ -99,7 +99,7 @@ namespace Mosaic::Frontend
         void RevokeGlobalCallbacks(void* subscriber);
 
         template <typename T>
-        void EmitGlobalEvent(const T& event)
+        inline void EmitGlobalEvent(const T& event)
         {
             mGlobalEventManager.EmitEvent(event);
         }

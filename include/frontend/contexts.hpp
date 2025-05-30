@@ -28,31 +28,31 @@ namespace Mosaic::Frontend
         void NewComponent(const std::string& tag);
 
         template <typename T, typename... Args>
-        void NewComponent(const std::string& tag, Args&&... args)
+        inline void NewComponent(const std::string& tag, Args&&... args)
         {
             mComponentManager.NewComponent<T>(tag, std::forward<Args>(args)...);
         }
 
         template <typename T>
-        T& GetComponent(const std::string& tag)
+        inline T& GetComponent(const std::string& tag)
         {
             return mComponentManager.GetComponentInstance<T>(tag);
         }
 
         template <typename T>
-        std::string GetComponentTag(T& component)
+        inline std::string GetComponentTag(T& component)
         {
             return mComponentManager.GetComponentTag(component);
         }
 
         template <typename T>
-        void RemoveComponent(const std::string& tag)
+        inline void RemoveComponent(const std::string& tag)
         {
             mComponentManager.RemoveComponentByTag<T>(tag);
         }
 
         template <typename T>
-        void RemoveComponent(T& component)
+        inline void RemoveComponent(T& component)
         {
             mComponentManager.RemoveComponentByInstance(component);
         }

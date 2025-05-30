@@ -41,7 +41,7 @@ namespace Mosaic::Frontend
         ComponentManager& operator=(ComponentManager&& other) noexcept;
 
         template <typename T, typename... Args>
-        T& NewComponent(const std::string& tag, Args&&... args)
+        inline T& NewComponent(const std::string& tag, Args&&... args)
         {
             static_assert(std::is_base_of_v<Component, T>, "Type provided must inherit from Component");
 
@@ -57,7 +57,7 @@ namespace Mosaic::Frontend
         }
 
         template <typename T>
-        T& GetComponentInstance(const std::string& tag)
+        inline T& GetComponentInstance(const std::string& tag)
         {
             static_assert(std::is_base_of_v<Component, T>, "Type provided must inherit from Component");
 
@@ -79,7 +79,7 @@ namespace Mosaic::Frontend
         }
 
         template <typename T>
-        std::string GetComponentTag(T& component)
+        inline std::string GetComponentTag(T& component)
         {
             static_assert(std::is_base_of_v<Component, T>, "Type provided must inherit from Component");
 
@@ -95,7 +95,7 @@ namespace Mosaic::Frontend
         }
 
         template <typename T>
-        void RemoveComponentByTag(const std::string& tag)
+        inline void RemoveComponentByTag(const std::string& tag)
         {
             static_assert(std::is_base_of_v<Component, T>, "Type provided must inherit from Component");
 
@@ -117,7 +117,7 @@ namespace Mosaic::Frontend
         }
 
         template <typename T>
-        void RemoveComponentByInstance(T& component)
+        inline void RemoveComponentByInstance(T& component)
         {
             static_assert(std::is_base_of_v<Component, T>, "Type provided must inherit from Component");
 

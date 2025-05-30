@@ -17,7 +17,7 @@ namespace Mosaic::Utilities
         void Save() const;
 
         template <typename T>
-        T Get(const std::string& key, const T& fallback) const
+        inline T Get(const std::string& key, const T& fallback) const
         {
             auto keys = SplitKey(key);
 
@@ -52,7 +52,7 @@ namespace Mosaic::Utilities
         }
 
         template <typename T, std::uint32_t N>
-        std::array<T, N> Get(const std::string& key) const
+        inline std::array<T, N> Get(const std::string& key) const
         {
             auto keys = SplitKey(key);
 
@@ -86,7 +86,7 @@ namespace Mosaic::Utilities
         }
 
         template <typename T, std::uint32_t N>
-        std::array<T, N> Get(const std::string& key, const std::array<T, N>& fallback) const
+        inline std::array<T, N> Get(const std::string& key, const std::array<T, N>& fallback) const
         {
             auto keys = SplitKey(key);
 
@@ -118,7 +118,7 @@ namespace Mosaic::Utilities
         }
 
         template <typename T>
-        T Get(const std::string& key) const
+        inline T Get(const std::string& key) const
         {
             auto keys = SplitKey(key);
 
@@ -155,7 +155,7 @@ namespace Mosaic::Utilities
         }
 
         template <typename T>
-        void Set(const std::string& key, const T& value)
+        inline void Set(const std::string& key, const T& value)
         {
             auto keys = SplitKey(key);
 
@@ -178,7 +178,7 @@ namespace Mosaic::Utilities
         static std::vector<std::string> SplitKey(const std::string& key);
 
         template <typename T, std::uint32_t N>
-        static std::optional<std::array<T, N>> ExtractArray(const toml::node* node)
+        inline static std::optional<std::array<T, N>> ExtractArray(const toml::node* node)
         {
             if (const auto* arr = node ? node->as_array() : nullptr)
             {
