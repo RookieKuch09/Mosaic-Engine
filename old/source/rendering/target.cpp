@@ -2,7 +2,7 @@
 
 #include "rendering/target.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     RenderTarget::RenderTarget(Types::Rectangle&& area, RendererCommandManager& commands)
         : mArea(area), mRendererCommandManager(commands)

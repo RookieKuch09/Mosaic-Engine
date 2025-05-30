@@ -12,12 +12,12 @@
 #include "utilities/numerics.hpp"
 #include "utilities/vector.hpp"
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     struct WindowResizeEvent;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class VulkanRenderer : public RendererInterface
     {

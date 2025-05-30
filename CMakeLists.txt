@@ -25,13 +25,9 @@ else()
 endif()
 
 # Find all platform-independent required packages
-find_package(GLEW REQUIRED)
-find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 # Link library against required packages
-target_link_libraries(Mosaic PRIVATE GLEW::GLEW)
-target_link_libraries(Mosaic PRIVATE OpenGL::GL)
 target_link_libraries(Mosaic PRIVATE glfw)
 
 # Clear install directory to avoid stale files

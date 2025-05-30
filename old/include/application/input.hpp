@@ -7,7 +7,7 @@
 
 #include <unordered_map>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     class EventManager;
 

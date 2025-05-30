@@ -6,7 +6,7 @@
 
 #include <toml++/toml.hpp>
 
-namespace Mosaic::Internal::Files
+namespace Mosaic::Systems::Internal::Files
 {
     enum class ConfigFiletype
     {

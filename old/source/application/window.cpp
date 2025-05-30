@@ -9,7 +9,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     Window::Window(Rendering::Renderer& renderer, EventManager& eventManager)
         : mSize(0, 0), mPosition(0, 0), mTitle(""), mConfigPath(""), mRunning(false), mFullscreen(false), mRenderer(renderer), mEventManager(eventManager)

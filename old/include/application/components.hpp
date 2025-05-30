@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     struct ApplicationData;
 

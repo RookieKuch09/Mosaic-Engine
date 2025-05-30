@@ -4,7 +4,7 @@
 
 #include <set>
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanQueues::Discover(VulkanPhysicalDevice& physicalDevice, VulkanSurface& surface)
     {

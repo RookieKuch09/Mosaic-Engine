@@ -7,18 +7,18 @@
 
 #include <string>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     class Application;
     class EventManager;
 }
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     class Window;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     enum class RendererVSync
     {

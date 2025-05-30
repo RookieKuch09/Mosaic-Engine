@@ -4,7 +4,7 @@
 
 #include <algorithm>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     template <typename T>
     void EventManager::Subscribe(void* subscriber, std::function<void(const T&)> callback)

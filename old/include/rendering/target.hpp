@@ -3,17 +3,17 @@
 #include "rendering/commands.hpp"
 #include "utilities/rect.hpp"
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     class Window;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class RendererCommandManager;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class RenderTarget
     {

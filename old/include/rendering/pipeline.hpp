@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class Shader
     {

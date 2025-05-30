@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Mosaic::Internal::Types
+namespace Mosaic::Systems::Internal::Types
 {
     using I8 = char;
     using I16 = short;

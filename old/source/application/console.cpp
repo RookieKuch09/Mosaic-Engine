@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     std::string Console::GetCurrentTime()
     {

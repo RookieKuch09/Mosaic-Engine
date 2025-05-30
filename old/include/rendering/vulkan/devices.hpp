@@ -6,7 +6,7 @@
 
 #include <unordered_set>
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class VulkanInstance;
     class VulkanQueues;

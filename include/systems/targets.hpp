@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     class RenderTarget
     {

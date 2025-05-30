@@ -2,12 +2,12 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     class Window;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class VulkanInstance;
     class VulkanPhysicalDevice;

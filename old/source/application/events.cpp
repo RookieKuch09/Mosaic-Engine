@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     void EventManager::Unsubscribe(void* subscriber)
     {

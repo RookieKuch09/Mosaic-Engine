@@ -3,7 +3,7 @@
 
 #include "utilities/config.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     Renderer::Renderer(Windowing::Window& window, EventManager& eventManager)
         : mConfigPath(""), mBackend(nullptr), mWindow(window), mEventManager(eventManager)

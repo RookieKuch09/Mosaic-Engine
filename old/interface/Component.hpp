@@ -12,7 +12,7 @@
 
 #include <Mosaic/include/rendering/mesh.hpp>
 
-namespace Mosaic
+namespace Mosaic::Systems
 {
     using Internal::Component;
     using Internal::ComponentManager;

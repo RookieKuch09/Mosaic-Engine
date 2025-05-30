@@ -11,27 +11,24 @@ At its core, Mosaic embraces a strict and explicit API design, inspired by moder
 - **Input Handling**: Unified keyboard and mouse inputs
 - **Event Management**: Flexible event and communication system
 - **Component Design**: Relies on Components for functionality
-- **Multiple Rendering APIs**: Support for both Vulkan and OpenGL
+- **Vulkan Support**: Uses Vulkan for rendering
 
 ## Requirements
 
 - Any C++23 compatible compiler
 - [CMake](https://cmake.org/)
-- A system with OpenGL or Vulkan support
+- A system with Vulkan support
 
 ## Roadmap
 
 - **Rendering System**: Currently working to integrate a fully featured rendering system
 - **Audio Playback**: Plans to integrate [OpenAL](https://www.openal.org/) for in-depth audio support
-- **More Rendering Backends**: Potential future support for rendering backends like Metal or DirectX
 
 ## Third-Party Libraries
 
 Mosaic Engine makes use of the following open-source libraries:
 
-- **GLFW** — Cross-platform windowing and input
 - **GLM** — Multipurpose mathematics library
-- **GLEW** — OpenGL extension loader
 - **Boost** — Additional C++ types and systems
 
 Thanks to the authors and contributors of these projects!

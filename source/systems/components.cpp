@@ -1,10 +1,10 @@
-#include "../../include/frontend/components.hpp"
-#include "../../include/frontend/contexts.hpp"
+#include "../../include/systems/components.hpp"
+#include "../../include/systems/contexts.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
-    Component::Component(Mosaic::Frontend::LocalContext& localContext, Mosaic::Frontend::GlobalContext& globalContext)
-        : EventLayer(localContext.mEventManager, globalContext.mEventManager), LocalContext(localContext), GlobalContext(globalContext), LocalEventManager(localContext.mEventManager), GlobalEventManager(globalContext.mEventManager)
+    Component::Component(Mosaic::Systems::LocalContext& localContext, Mosaic::Systems::GlobalContext& globalContext)
+        : EventLayer(localContext.mEventManager, globalContext.mEventManager), LocalContext(localContext), GlobalContext(globalContext), LocalEventManager(localContext.mEventManager), GlobalEventManager(globalContext.mEventManager), Window(globalContext.mWindow), Renderer(globalContext.mRenderer)
     {
     }
 

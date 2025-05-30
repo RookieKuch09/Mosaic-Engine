@@ -4,11 +4,13 @@
 
 #include <vector>
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     class ComponentManager;
     class LocalContext;
     class GlobalContext;
+    class Window;
+    class Renderer;
 
     class Component : public EventLayer
     {
@@ -21,6 +23,9 @@ namespace Mosaic::Frontend
         virtual void Start();
         virtual void Update();
         virtual void Stop();
+
+        Window& Window;
+        Renderer& Renderer;
 
         EventManager& LocalEventManager;
         EventManager& GlobalEventManager;

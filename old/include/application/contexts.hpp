@@ -4,7 +4,7 @@
 
 #include <rendering/renderer.hpp>
 
-namespace Mosaic::Internal::Application
+namespace Mosaic::Systems::Internal::Application
 {
     class GlobalContext
     {

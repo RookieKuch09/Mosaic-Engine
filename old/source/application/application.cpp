@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     Instance::Instance(ComponentManager& componentManager, EventManager& eventManager, Windowing::Window& window, Rendering::Renderer& renderer)
         : mEventManager(eventManager), mWindow(window), mRenderer(renderer), mComponentManager(componentManager)

@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     struct ApplicationQuitEvent
     {
@@ -51,10 +51,10 @@ namespace Mosaic::Frontend
 
         void RevokeCallbacks(void* subscriber);
 
-        template <typename T>
-        inline void EmitEvent(const T& event)
+        template <typename T, typename... Args>
+        inline void PostEvent(Args&&... args)
         {
-            mEventQueue[typeid(T)].push(event);
+            mEventQueue[typeid(T)].emplace(std::forward<Args>(args)...);
         }
 
         struct EventListener
@@ -84,10 +84,10 @@ namespace Mosaic::Frontend
 
         void RevokeLocalCallbacks(void* subscriber);
 
-        template <typename T>
-        inline void EmitLocalEvent(const T& event)
+        template <typename T, typename... Args>
+        inline void PostLocalEvent(Args&&... args)
         {
-            mLocalEventManager.EmitEvent(event);
+            mLocalEventManager.PostEvent<T>(std::forward<Args>(args)...);
         }
 
         template <typename T, typename TClass>
@@ -98,10 +98,10 @@ namespace Mosaic::Frontend
 
         void RevokeGlobalCallbacks(void* subscriber);
 
-        template <typename T>
-        inline void EmitGlobalEvent(const T& event)
+        template <typename T, typename... Args>
+        inline void PostGlobalEvent(Args&&... args)
         {
-            mGlobalEventManager.EmitEvent(event);
+            mGlobalEventManager.PostEvent<T>(std::forward<Args>(args)...);
         }
 
     private:

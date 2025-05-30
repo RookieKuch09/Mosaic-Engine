@@ -3,7 +3,7 @@
 #include "application/console.hpp"
 #include "application/window.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanInstance::SelectWindowExtensions(const Windowing::Window& window)
     {

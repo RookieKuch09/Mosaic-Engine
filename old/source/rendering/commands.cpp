@@ -1,6 +1,6 @@
 #include "rendering/commands.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     RendererCommandManager::RendererCommandManager(Renderer& renderer)
         : mRenderer(renderer)

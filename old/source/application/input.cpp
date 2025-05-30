@@ -1,7 +1,7 @@
 #include "application/input.hpp"
 #include "application/events.hpp"
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     InputManager::InputManager(EventManager& eventManager)
         : mEventManager(eventManager)

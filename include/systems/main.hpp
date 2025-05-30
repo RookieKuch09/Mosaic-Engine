@@ -4,7 +4,7 @@
 
 int main()
 {
-    auto instance = Mosaic::Frontend::Instance::Create();
+    auto instance = Mosaic::Systems::Instance::Create();
 
     return instance->Run();
 }

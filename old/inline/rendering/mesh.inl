@@ -4,7 +4,7 @@
 
 #include "application/console.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     template <typename T>
     VertexAttribute<T>::VertexAttribute(Types::UI32 count)

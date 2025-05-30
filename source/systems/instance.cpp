@@ -1,7 +1,7 @@
-#include "../../include/frontend/instance.hpp"
-#include "frontend/contexts.hpp"
+#include "../../include/systems/instance.hpp"
+#include "../../include/systems/contexts.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     Instance::Instance(const std::string& configPath)
         : GlobalContext(configPath)

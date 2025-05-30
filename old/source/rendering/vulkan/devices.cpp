@@ -6,7 +6,7 @@
 
 #include "application/console.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanPhysicalDevice::Select(VulkanInstance& instance)
     {

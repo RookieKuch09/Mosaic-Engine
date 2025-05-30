@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     Component::Component(ComponentManager& componentManager, EventManager& eventManager)
         : mStarted(false), mComponentManager(componentManager), mEventManager(eventManager)

@@ -3,7 +3,7 @@
 #include "rendering/vulkan/queues.hpp"
 #include "rendering/vulkan/swapchain.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanCommandSystem::Create(VulkanDevice& device, VulkanQueues& queues)
     {

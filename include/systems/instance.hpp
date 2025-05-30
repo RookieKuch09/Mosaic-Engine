@@ -2,7 +2,7 @@
 
 #include "contexts.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     class Instance
     {

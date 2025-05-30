@@ -3,7 +3,7 @@
 #include "utilities/numerics.hpp"
 #include "utilities/vector.hpp"
 
-namespace Mosaic::Internal::Types
+namespace Mosaic::Systems::Internal::Types
 {
     struct Rectangle
     {

@@ -2,7 +2,7 @@
 
 #include "application/console.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     Mesh::Mesh()
         : mVertexLengthBytes(0), mFormat(nullptr), mSubmitted(false)

@@ -5,7 +5,7 @@
 #include "application/console.hpp"
 #include "application/window.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanSurface::SelectFormat(VulkanPhysicalDevice& physicalDevice, vk::Format format, vk::ColorSpaceKHR space)
     {

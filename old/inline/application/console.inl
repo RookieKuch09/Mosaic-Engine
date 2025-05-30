@@ -5,7 +5,7 @@
 #include <format>
 #include <iostream>
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     template <typename... Args>
     void Console::Assert(bool condition, const std::string& message, Args&&... args)

@@ -15,13 +15,13 @@ namespace vk
     struct Instance;
 }
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     class Application;
     class EventManager;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class Renderer;
     class VulkanRenderer;
@@ -30,7 +30,7 @@ namespace Mosaic::Internal::Rendering
     class OpenGLRenderer;
 }
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     struct ApplicationData;
 

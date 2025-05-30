@@ -5,7 +5,7 @@
 
 #include "rendering/opengl/renderer.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     OpenGLRenderer::OpenGLRenderer(Renderer& renderer)
         : mRenderer(renderer)

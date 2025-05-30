@@ -6,12 +6,12 @@
 
 #include <SDL3/SDL_video.h>
 
-namespace Mosaic::Internal::Windowing
+namespace Mosaic::Systems::Internal::Windowing
 {
     struct WindowResizeEvent;
 }
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class OpenGLRenderer : public RendererInterface
     {

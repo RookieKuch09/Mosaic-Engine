@@ -2,7 +2,7 @@
 
 #include "utilities/numerics.hpp"
 
-namespace Mosaic::Internal::TypeChecks
+namespace Mosaic::Systems::Internal::TypeChecks
 {
     template <typename T>
     struct IsNumeric
@@ -74,7 +74,7 @@ namespace Mosaic::Internal::TypeChecks
     constexpr bool IsNumericV = IsNumeric<T>::Result;
 }
 
-namespace Mosaic::Internal::TypeConcepts
+namespace Mosaic::Systems::Internal::TypeConcepts
 {
     template <typename T>
     concept Numeric = TypeChecks::IsNumericV<T>;

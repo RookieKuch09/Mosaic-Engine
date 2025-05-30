@@ -7,7 +7,7 @@
 
 #include "rendering/renderer.hpp"
 
-namespace Mosaic::Internal
+namespace Mosaic::Systems::Internal
 {
     enum class ApplicationPlatform
     {

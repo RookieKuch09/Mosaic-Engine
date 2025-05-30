@@ -1,6 +1,6 @@
-#include "../../include/frontend/contexts.hpp"
+#include "../../include/systems/contexts.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     LocalContext::LocalContext(GlobalContext& globalContext)
         : mGlobalContext(globalContext), mComponentManager(*this, globalContext), mStarted(false)
@@ -264,7 +264,7 @@ namespace Mosaic::Frontend
 
     void GlobalContext::Update()
     {
-        SetGlobalCallback(this, &GlobalContext::OnAppExit);
+        SetGlobalCallback<ApplicationQuitEvent>(this, &GlobalContext::OnAppExit);
 
         while (mRunning)
         {

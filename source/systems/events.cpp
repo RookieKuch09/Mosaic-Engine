@@ -1,8 +1,8 @@
-#include "../../include/frontend/events.hpp"
+#include "../../include/systems/events.hpp"
 
 #include <algorithm>
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     void EventManager::Update()
     {

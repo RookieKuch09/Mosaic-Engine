@@ -5,7 +5,7 @@
 
 #include <vector>
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     enum class VertexAttributeType
     {

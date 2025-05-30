@@ -8,7 +8,7 @@
 #include "application/window.hpp"
 #include "rendering/renderer.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     void VulkanFramebuffer::Create(VulkanDevice& device, VulkanSurface& surface, VulkanRenderPass& renderPass, VulkanSwapchain& swapchain)
     {

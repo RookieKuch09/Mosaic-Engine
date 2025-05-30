@@ -7,7 +7,7 @@
 #include <variant>
 #include <vector>
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     class Renderer;
 

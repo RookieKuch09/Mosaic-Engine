@@ -5,7 +5,7 @@
 
 #include <vulkan/vulkan.hpp>
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     enum class RendererVSync : int;
 

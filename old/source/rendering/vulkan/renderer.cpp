@@ -2,7 +2,7 @@
 
 #include "application/window.hpp"
 
-namespace Mosaic::Internal::Rendering
+namespace Mosaic::Systems::Internal::Rendering
 {
     VulkanRenderer::VulkanRenderer(Renderer& renderer)
         : mRenderer(renderer), mRebuildSwapchainSuboptimal(false), mRebuildSwapchainOutOfDate(false)

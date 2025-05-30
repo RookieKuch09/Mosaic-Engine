@@ -1,6 +1,6 @@
-#include "../../include/frontend/renderer.hpp"
+#include "../../include/systems/renderer.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     void Renderer::Start()
     {

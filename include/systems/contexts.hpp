@@ -8,7 +8,7 @@
 #include "renderer.hpp"
 #include "window.hpp"
 
-namespace Mosaic::Frontend
+namespace Mosaic::Systems
 {
     class LocalContextManager;
     class GlobalContext;

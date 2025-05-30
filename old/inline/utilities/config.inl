@@ -4,7 +4,7 @@
 
 #include "application/console.hpp"
 
-namespace Mosaic::Internal::Files
+namespace Mosaic::Systems::Internal::Files
 {
     template <typename T>
     T ConfigFile<ConfigFiletype::TOML>::Get(const std::string& key, const T& fallback) const

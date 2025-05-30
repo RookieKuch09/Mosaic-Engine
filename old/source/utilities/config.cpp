@@ -1,6 +1,6 @@
 #include "utilities/config.hpp"
 
-namespace Mosaic::Internal::Files
+namespace Mosaic::Systems::Internal::Files
 {
     ConfigFile<ConfigFiletype::TOML>::ConfigFile(const std::string& path)
     {

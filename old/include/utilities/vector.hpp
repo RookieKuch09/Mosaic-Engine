@@ -2,7 +2,7 @@
 
 #include "utilities/typeinfo.hpp"
 
-namespace Mosaic::Internal::Types
+namespace Mosaic::Systems::Internal::Types
 {
 
     template <TypeConcepts::Numeric T, UI32 Length>

@@ -4,7 +4,7 @@
 #include <Mosaic/include/application/console.hpp>
 #include <Mosaic/include/application/main.hpp>
 
-namespace Mosaic
+namespace Mosaic::Systems
 {
     using Internal::Component;
     using Internal::ComponentManager;

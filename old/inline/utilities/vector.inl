@@ -2,7 +2,7 @@
 
 #include "utilities/vector.hpp"
 
-namespace Mosaic::Internal::Types
+namespace Mosaic::Systems::Internal::Types
 {
     template <TypeConcepts::Numeric T>
     Vec<T, 2>::Vec()
