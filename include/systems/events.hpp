@@ -54,7 +54,7 @@ namespace Mosaic::Systems
         template <typename T, typename... Args>
         inline void PostEvent(Args&&... args)
         {
-            mEventQueue[typeid(T)].emplace(std::forward<Args>(args)...);
+            mEventQueue[typeid(T)].emplace(T(std::forward<Args>(args)...));
         }
 
         struct EventListener

@@ -14,7 +14,7 @@ namespace Mosaic::Systems
 
     struct WindowMoveEvent
     {
-        glm::fvec2 Position;
+        glm::uvec2 Position;
     };
 
     struct WindowResizeEvent
