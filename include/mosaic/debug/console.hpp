@@ -5,11 +5,14 @@
 #include <cstdint>
 #include <format>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 
-namespace Mosaic::Debug
+namespace Mosaic
 {
+    struct Resources;
+
     class MOSAIC_PUBLIC_EXPOSURE Console
     {
     public:
@@ -32,10 +35,10 @@ namespace Mosaic::Debug
             Fatal,
         };
 
-        OutputID CreateFileOutputID(const std::string& filepath);
+        [[nodiscard]] OutputID CreateFileOutput(const std::string& filepath);
 
         template <LogSeverity Severity, typename... Args>
-        void Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+        inline void Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
         {
             std::string prefix;
 
@@ -80,9 +83,18 @@ namespace Mosaic::Debug
             {
                 DispatchToFile(it->second, timestamp + prefix + formatted);
             }
+            else
+            {
+                auto warning = std::format("OutputID {} does not exist or is unavailable. Rerouting output to terminal:", outputID);
+
+                DispatchToTerminal(timestamp + "[Reroute] " + warning);
+                DispatchToTerminal(timestamp + prefix + formatted);
+            }
         }
 
     private:
+        Console() = default;
+
         struct FileOutput
         {
             std::ofstream Stream;
@@ -99,5 +111,7 @@ namespace Mosaic::Debug
         std::string GetTimestamp();
 
         void AddInitialLogstamp(std::ofstream& file, const std::string& filepath);
+
+        friend struct Resources;
     };
 }

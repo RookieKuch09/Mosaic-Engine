@@ -4,16 +4,20 @@
 
 #if defined(MOSAIC_PLATFORM_UNIX)
 
-#define MOSAIC_DEFINE_MAIN()        \
-                                    \
-    int main(int argc, char** argv) \
-    {                               \
-        return 0;                   \
+#define MOSAIC_DEFINE_MAIN(ApplicationType)         \
+                                                    \
+    int main(int argc, char** argv)                 \
+    {                                               \
+        Mosaic::Instance<ApplicationType> instance; \
+                                                    \
+        instance.Setup();                           \
+                                                    \
+        return instance.Run();                      \
     }
 
 #else
 
-#define MOSAIC_DEFINE_MAIN()
+#define MOSAIC_DEFINE_MAIN(ApplicationType)
 
 #error Unsupported platform for Mosaic
 

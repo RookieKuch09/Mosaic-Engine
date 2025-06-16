@@ -7,9 +7,9 @@
 
 #include <mosaic/api/pid.hpp>
 
-namespace Mosaic::Debug
+namespace Mosaic
 {
-    Console::OutputID Console::CreateFileOutputID(const std::string& filepath)
+    Console::OutputID Console::CreateFileOutput(const std::string& filepath)
     {
         OutputID id = HashFilePath(filepath);
 
