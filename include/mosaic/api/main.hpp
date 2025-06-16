@@ -13,6 +13,8 @@
 
 #else
 
+#define MOSAIC_DEFINE_MAIN()
+
 #error Unsupported platform for Mosaic
 
 #endif

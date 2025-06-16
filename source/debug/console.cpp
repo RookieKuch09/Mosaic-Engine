@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <mosaic/api/pid.hpp>
+
 namespace Mosaic::Debug
 {
     Console::OutputID Console::CreateFileOutputID(const std::string& filepath)
@@ -21,10 +23,7 @@ namespace Mosaic::Debug
                 throw std::runtime_error("Failed to open log file: " + filepath);
             }
 
-            auto sessionHeader = std::format("\n--- Log Session Started: {} ---\n", GetTimestamp());
-
-            stream << sessionHeader;
-            stream.flush();
+            AddInitialLogstamp(stream, filepath);
 
             mFileOutputs.emplace(id, std::move(stream));
         }
@@ -59,5 +58,16 @@ namespace Mosaic::Debug
         buffer << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
 
         return buffer.str();
+    }
+
+    void Console::AddInitialLogstamp(std::ofstream& file, const std::string& filepath)
+    {
+        auto pid = MOSAIC_GET_PID();
+        auto timestamp = GetTimestamp();
+
+        auto sessionHeader = std::format("\n--- Log Session Started: {} | PID: {} | Filepath: {} ---\n", timestamp, pid, filepath);
+
+        file << sessionHeader;
+        file.flush();
     }
 }

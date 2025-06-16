@@ -97,5 +97,7 @@ namespace Mosaic::Debug
         OutputID HashFilePath(const std::string& filepath);
 
         std::string GetTimestamp();
+
+        void AddInitialLogstamp(std::ofstream& file, const std::string& filepath);
     };
 }

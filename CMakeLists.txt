@@ -11,23 +11,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-file(GLOB_RECURSE MOSAIC_SRC "source/*.cpp")
+file(GLOB_RECURSE MOSAIC_SOURCES "source/*.cpp")
 file(GLOB_RECURSE MOSAIC_HEADERS "include/mosaic/*.hpp")
 
-add_library(Mosaic ${MOSAIC_SRC} ${MOSAIC_HEADERS})
+add_library(Mosaic ${MOSAIC_SOURCES} ${MOSAIC_HEADERS})
 
 target_include_directories(Mosaic
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-pkg_search_module(GLEW REQUIRED glew)
-
-target_include_directories(Mosaic PUBLIC ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-target_link_libraries(Mosaic ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
 
 install(CODE "
     file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/include/mosaic\")
