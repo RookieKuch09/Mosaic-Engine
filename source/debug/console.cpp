@@ -15,11 +15,16 @@ namespace Mosaic::Debug
         {
             std::ofstream stream(filepath, std::ios::app);
 
+            // TODO: replace with engine API assertion
             if (not stream)
             {
-                // TODO: replace with engine API assertion
                 throw std::runtime_error("Failed to open log file: " + filepath);
             }
+
+            auto sessionHeader = std::format("\n--- Log Session Started: {} ---\n", GetTimestamp());
+
+            stream << sessionHeader;
+            stream.flush();
 
             mFileOutputs.emplace(id, std::move(stream));
         }
