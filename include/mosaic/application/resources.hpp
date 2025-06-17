@@ -4,10 +4,16 @@
 
 #include <mosaic/debug/console.hpp>
 
+#include <mosaic/ecs/manager.hpp>
+
 namespace Mosaic
 {
     struct Resources
     {
-        Console Console;
+        Resources();
+
+        Debug::Console Console;
+
+        ECS::Manager ECSManager;
     };
 }

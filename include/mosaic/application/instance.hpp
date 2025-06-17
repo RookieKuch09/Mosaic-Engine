@@ -26,6 +26,8 @@ namespace Mosaic
 
         std::int32_t Run()
         {
+            mResources.ECSManager.Update();
+
             return 0;
         }
 

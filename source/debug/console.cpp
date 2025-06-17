@@ -7,7 +7,7 @@
 
 #include <mosaic/api/pid.hpp>
 
-namespace Mosaic
+namespace Mosaic::Debug
 {
     Console::OutputID Console::CreateFileOutput(const std::string& filepath)
     {
