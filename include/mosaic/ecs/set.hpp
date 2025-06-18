@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mosaic/debug/console.hpp>
+
 #include <mosaic/api/exposure.hpp>
 
 #include <mosaic/ecs/entity.hpp>
@@ -10,68 +12,43 @@
 
 namespace Mosaic::ECS
 {
-    struct SparseSetInterface
+    struct MOSAIC_PUBLIC_EXPOSURE SparseSetInterface
     {
+        SparseSetInterface() = default;
+
+        SparseSetInterface(const SparseSetInterface& other) = default;
+        auto operator=(const SparseSetInterface& other) -> SparseSetInterface& = default;
+
+        SparseSetInterface(SparseSetInterface&& other) noexcept = default;
+        auto operator=(SparseSetInterface&& other) noexcept -> SparseSetInterface& = default;
+
         virtual ~SparseSetInterface() = default;
     };
 
     template <typename Component>
     struct MOSAIC_PUBLIC_EXPOSURE SparseSet : SparseSetInterface
     {
+        SparseSet() = default;
+
+        SparseSet(const SparseSet& other) = default;
+        auto operator=(const SparseSet& other) -> SparseSet& = default;
+
+        SparseSet(SparseSet&& other) noexcept = default;
+        auto operator=(SparseSet&& other) noexcept -> SparseSet& = default;
+
+        ~SparseSet() override = default;
+
+        void Insert(Debug::Console& console, const Entity& entity, const Component& component);
+        void Remove(Debug::Console& console, const Entity& entity);
+
+        [[nodiscard]] auto Get(const Entity& entity) -> Component*;
+        [[nodiscard]] auto Has(const Entity& entity) const -> bool;
+
         std::vector<Component> Components;
         std::vector<Entity> Entities;
 
         std::unordered_map<EntityID, std::uint32_t> EntityIndex;
-
-        void Insert(const Entity& entity, const Component& component)
-        {
-            if (EntityIndex.find(entity.ID) != EntityIndex.end())
-            {
-                // TODO: log warning about entity already existing
-                return;
-            }
-
-            EntityIndex[entity.ID] = Components.size();
-            Entities.emplace_back(entity);
-            Components.emplace_back(component);
-        }
-
-        void Remove(const Entity& entity)
-        {
-            auto it = EntityIndex.find(entity.ID);
-
-            if (it == EntityIndex.end())
-            {
-                return;
-            }
-
-            std::uint32_t index = it->second;
-            Entity lastEntity = Entities.back();
-
-            Components[index] = Components.back();
-            Entities[index] = lastEntity;
-            EntityIndex[lastEntity.ID] = index;
-
-            Components.pop_back();
-            Entities.pop_back();
-            EntityIndex.erase(it);
-        }
-
-        Component* Get(const Entity& entity)
-        {
-            auto it = EntityIndex.find(entity.ID);
-
-            if (it == EntityIndex.end())
-            {
-                return nullptr;
-            }
-
-            return &Components[it->second];
-        }
-
-        bool Has(const Entity& entity) const
-        {
-            return EntityIndex.find(entity.ID) != EntityIndex.end();
-        }
     };
 }
+
+#include <mosaic/inline/ecs/set.inl>

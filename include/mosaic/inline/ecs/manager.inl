@@ -1,11 +1,16 @@
 #pragma once
 
+#include <mosaic/debug/console.hpp>
+
+#include <mosaic/ecs/entity.hpp>
 #include <mosaic/ecs/manager.hpp>
+
+#include <boost/type_index.hpp>
 
 namespace Mosaic::ECS
 {
     template <typename Blueprint>
-    Entity Manager::CreateEntity()
+    auto Manager::CreateEntity() -> Entity
     {
         Entity entity = CreateEntity();
 
@@ -15,12 +20,12 @@ namespace Mosaic::ECS
     }
 
     template <typename Blueprint>
-    std::vector<Entity> Manager::CreateEntities(size_t count)
+    auto Manager::CreateEntities(uint32_t count) -> std::vector<Entity>
     {
         std::vector<Entity> entities;
         entities.reserve(count);
 
-        for (size_t i = 0; i < count; i++)
+        for (std::uint32_t i = 0; i < count; i++)
         {
             entities.push_back(CreateEntity<Blueprint>());
         }
@@ -35,8 +40,7 @@ namespace Mosaic::ECS
 
         SparseSet<Component>* set = nullptr;
 
-        auto it = mComponentStorage.find(typeIndex);
-        if (it == mComponentStorage.end())
+        if (not mComponentStorage.contains(typeIndex))
         {
             auto newSet = std::make_unique<SparseSet<Component>>();
             set = newSet.get();
@@ -44,16 +48,18 @@ namespace Mosaic::ECS
         }
         else
         {
-            set = static_cast<SparseSet<Component>*>(it->second.get());
+            set = static_cast<SparseSet<Component>*>(mComponentStorage[typeIndex].get());
         }
 
         if (not set->Has(entity))
         {
-            set->Insert(entity, component);
+            set->Insert(*mConsole, entity, component);
         }
         else
         {
-            // TODO: log warning for adding already existing component
+            auto name = boost::typeindex::type_id<Component>().pretty_name();
+
+            mConsole->Log<Debug::Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
         }
     }
 
@@ -68,22 +74,22 @@ namespace Mosaic::ECS
     {
         auto typeIndex = std::type_index(typeid(Component));
 
-        auto it = mComponentStorage.find(typeIndex);
-
-        if (it == mComponentStorage.end())
+        if (not mComponentStorage.contains(typeIndex))
         {
             return;
         }
 
-        auto* set = static_cast<SparseSet<Component>*>(it->second.get());
+        auto* set = static_cast<SparseSet<Component>*>(mComponentStorage[typeIndex].get());
 
         if (set->Has(entity))
         {
-            set->Remove(entity);
+            set->Remove(*mConsole, entity);
         }
         else
         {
-            // TODO: log warning for component not existing on entity
+            auto name = boost::typeindex::type_id<Component>().pretty_name();
+
+            mConsole->Log<Debug::Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
         }
     }
 
@@ -101,34 +107,34 @@ namespace Mosaic::ECS
 
         for (std::uint32_t i = 0; i < primarySet->Entities.size(); i++)
         {
-            Entity e = primarySet->Entities[i];
+            Entity entity = primarySet->Entities[i];
 
-            bool valid = ((std::get<SparseSet<Components>*>(sets)->Has(e)) and ...);
+            bool valid = ((std::get<SparseSet<Components>*>(sets)->Has(entity)) and ...);
 
             if (not valid)
             {
                 continue;
             }
 
-            what(e, *std::get<SparseSet<Components>*>(sets)->Get(e)...);
+            what(entity, *std::get<SparseSet<Components>*>(sets)->Get(entity)...);
         }
     }
 
     template <typename Component>
-    SparseSet<Component>* Manager::GetComponentSet()
+    auto Manager::GetComponentSet() -> SparseSet<Component>*
     {
-        auto it = mComponentStorage.find(std::type_index(typeid(Component)));
+        auto typeIndex = std::type_index(typeid(Component));
 
-        if (it == mComponentStorage.end())
+        if (not mComponentStorage.contains(typeIndex))
         {
             return nullptr;
         }
 
-        return static_cast<SparseSet<Component>*>(it->second.get());
+        return static_cast<SparseSet<Component>*>(mComponentStorage[typeIndex].get());
     }
 
-    template <typename Blueprint, std::size_t... Is>
-    void Manager::AddComponentsImpl(Entity entity, std::index_sequence<Is...>)
+    template <typename Blueprint, std::uint32_t... Is>
+    void Manager::AddComponentsImpl(Entity entity)
     {
         (AddComponent<typename Blueprint::template ComponentType<Is>>(entity, {}), ...);
     }

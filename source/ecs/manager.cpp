@@ -2,35 +2,36 @@
 
 namespace Mosaic::ECS
 {
-    Manager::Manager(Resources& resources)
-        : mResources(resources)
+    Manager::Manager(Resources& resources, Debug::Console& console)
+        : mResources(&resources), mConsole(&console)
     {
     }
 
-    Entity Manager::CreateEntity()
+    auto Manager::CreateEntity() -> Entity
     {
-        EntityID id;
+        EntityID entityID = 0;
 
         if (not mFreedIDs.empty())
         {
-            id = mFreedIDs.back();
+            entityID = mFreedIDs.back();
             mFreedIDs.pop_back();
         }
         else
         {
-            id = static_cast<EntityID>(mGenerations.size());
+            entityID = static_cast<EntityID>(mGenerations.size());
             mGenerations.push_back(0);
         }
 
-        return Entity{id, mGenerations[id]};
+        return Entity{.ID = entityID, .Generation = mGenerations[entityID]};
     }
 
-    std::vector<Entity> Manager::CreateEntities(size_t count)
+    auto Manager::CreateEntities(std::uint32_t count) -> std::vector<Entity>
     {
         std::vector<Entity> entities;
+
         entities.reserve(count);
 
-        for (size_t i = 0; i < count; i++)
+        for (std::uint32_t i = 0; i < count; i++)
         {
             entities.push_back(CreateEntity());
         }
@@ -51,13 +52,13 @@ namespace Mosaic::ECS
 
     void Manager::DestroyEntities(const std::vector<Entity>& entities)
     {
-        for (auto& entity : entities)
+        for (const auto entity : entities)
         {
             DestroyEntity(entity);
         }
     }
 
-    bool Manager::IsAlive(Entity entity) const
+    auto Manager::IsAlive(Entity entity) const -> bool
     {
         return entity.ID < mGenerations.size() and mGenerations[entity.ID] == entity.Generation;
     }
@@ -71,7 +72,7 @@ namespace Mosaic::ECS
     {
         for (auto& system : mSystems)
         {
-            system(mResources);
+            system(*mResources);
         }
     }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mosaic/debug/console.hpp"
 #include <mosaic/api/exposure.hpp>
 
 #include <mosaic/ecs/entity.hpp>
@@ -15,8 +16,13 @@ namespace Mosaic
     struct Resources;
     class Application;
 
-    template <typename T> requires std::is_base_of<Application, T>::value
+    template <typename T> requires std::is_base_of_v<Application, T>
     class Instance;
+
+    namespace Debug
+    {
+        class Console;
+    }
 
     namespace ECS
     {
@@ -26,9 +32,9 @@ namespace Mosaic
         struct MOSAIC_PUBLIC_EXPOSURE EntityBlueprint
         {
             using ComponentsTuple = std::tuple<Components...>;
-            static constexpr std::size_t ComponentCount = sizeof...(Components);
+            static constexpr std::uint32_t ComponentCount = sizeof...(Components);
 
-            template <std::size_t I>
+            template <std::uint32_t I>
             using ComponentType = std::tuple_element_t<I, ComponentsTuple>;
         };
 
@@ -36,17 +42,22 @@ namespace Mosaic
         {
         public:
             Manager(const Manager& other) = delete;
-            Manager& operator=(const Manager& other) = delete;
+            Manager(Manager&& other) noexcept = default;
 
-            Entity CreateEntity();
+            auto operator=(const Manager& other) -> Manager& = delete;
+            auto operator=(Manager&& other) noexcept -> Manager& = default;
+
+            ~Manager() = default;
+
+            [[nodiscard]] auto CreateEntity() -> Entity;
 
             template <typename Blueprint>
-            Entity CreateEntity();
+            auto CreateEntity() -> Entity;
 
-            std::vector<Entity> CreateEntities(size_t count);
+            [[nodiscard]] auto CreateEntities(std::uint32_t count) -> std::vector<Entity>;
 
             template <typename Blueprint>
-            std::vector<Entity> CreateEntities(size_t count);
+            auto CreateEntities(std::uint32_t count) -> std::vector<Entity>;
 
             template <typename Component>
             void AddComponent(Entity entity, const Component& component = Component{});
@@ -61,7 +72,7 @@ namespace Mosaic
 
             void DestroyEntities(const std::vector<Entity>& entities);
 
-            bool IsAlive(Entity entity) const;
+            [[nodiscard]] auto IsAlive(Entity entity) const -> bool;
 
             template <typename... Components>
             void ForEach(auto&& what);
@@ -69,15 +80,15 @@ namespace Mosaic
             void AddSystem(const System& system);
 
         private:
-            Manager(Resources& resources);
+            Manager(Resources& resources, Debug::Console& console);
 
             void Update();
 
             template <typename Component>
-            SparseSet<Component>* GetComponentSet();
+            auto GetComponentSet() -> SparseSet<Component>*;
 
-            template <typename Blueprint, std::size_t... Is>
-            void AddComponentsImpl(Entity entity, std::index_sequence<Is...>);
+            template <typename Blueprint, std::uint32_t... Is>
+            void AddComponentsImpl(Entity entity);
 
             std::unordered_map<std::type_index, std::unique_ptr<SparseSetInterface>> mComponentStorage;
 
@@ -85,9 +96,12 @@ namespace Mosaic
             std::vector<EntityGeneration> mGenerations;
             std::vector<EntityID> mFreedIDs;
 
-            Resources& mResources;
+            Resources* mResources;
 
-            template <typename T> requires std::is_base_of<Application, T>::value
+            Debug::Console* mConsole;
+
+            template <typename T>
+            requires std::is_base_of_v<Application, T>
             friend class Mosaic::Instance;
 
             friend struct Mosaic::Resources;

@@ -39,7 +39,7 @@ namespace Mosaic::Debug
     }
 
     template <typename... Args>
-    [[noreturn]] void Console::Throw(const std::format_string<Args...>& message, Args&&... args)
+    void Console::Throw(const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
         std::string timestamp = "[" + GetTimestamp() + "]";
@@ -50,7 +50,7 @@ namespace Mosaic::Debug
     }
 
     template <typename... Args>
-    [[noreturn]] void Console::Throw(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    void Console::Throw(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
         std::string timestamp = "[" + GetTimestamp() + "]";

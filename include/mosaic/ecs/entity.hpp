@@ -14,6 +14,6 @@ namespace Mosaic::ECS
         EntityID ID;
         EntityGeneration Generation;
 
-        bool operator==(const Entity& other) const;
+        auto operator==(const Entity& other) const -> bool;
     };
 }

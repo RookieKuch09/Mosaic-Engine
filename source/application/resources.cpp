@@ -3,7 +3,7 @@
 namespace Mosaic
 {
     Resources::Resources()
-        : ECSManager(*this)
+        : ECSManager(*this, Console)
     {
     }
 }

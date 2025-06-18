@@ -10,26 +10,15 @@
 
 namespace Mosaic
 {
-    template <typename T> requires std::is_base_of<Application, T>::value
+    template <typename T> requires std::is_base_of_v<Application, T>
     class MOSAIC_PUBLIC_EXPOSURE Instance
     {
     public:
-        Instance()
-            : mInstance(mResources)
-        {
-        }
+        Instance();
 
-        void Setup()
-        {
-            mInstance.Setup();
-        }
+        void Setup();
 
-        std::int32_t Run()
-        {
-            mResources.ECSManager.Update();
-
-            return 0;
-        }
+        auto Run() -> std::int32_t;
 
     private:
         T mInstance;
@@ -37,3 +26,5 @@ namespace Mosaic
         Resources mResources;
     };
 }
+
+#include <mosaic/inline/application/instance.inl>

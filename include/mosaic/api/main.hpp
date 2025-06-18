@@ -6,7 +6,7 @@
 
 #define MOSAIC_DEFINE_MAIN(ApplicationType)         \
                                                     \
-    int main(int argc, char** argv)                 \
+    auto main(int argc, char** argv) -> int         \
     {                                               \
         Mosaic::Instance<ApplicationType> instance; \
                                                     \
