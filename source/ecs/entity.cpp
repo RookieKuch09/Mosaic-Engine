@@ -1,6 +1,6 @@
 #include <mosaic/ecs/entity.hpp>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
     auto Entity::operator==(const Entity& other) const -> bool
     {

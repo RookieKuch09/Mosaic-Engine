@@ -2,7 +2,7 @@
 
 #include <mosaic/debug/console.hpp>
 
-namespace Mosaic::Debug
+namespace Mosaic
 {
     template <Console::LogSeverity Severity, typename... Args>
     void Console::Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)

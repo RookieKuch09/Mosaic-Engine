@@ -4,51 +4,51 @@
 
 #include <tuple>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
     template <typename... Components>
-    View<Components...>::Iterator::Iterator(Manager* manager, const std::vector<Entity>& entities, std::uint32_t index)
-        : mManager(manager), mEntities(&entities), mIndex(index)
+    ECSView<Components...>::Iterator::Iterator(ECSManager& manager, const std::vector<Entity>& entities, std::uint32_t index)
+        : mManager(manager), mEntities(entities), mIndex(index)
     {
     }
 
     template <typename... Components>
-    auto View<Components...>::Iterator::operator!=(const Iterator& other) const -> bool
+    auto ECSView<Components...>::Iterator::operator!=(const Iterator& other) const -> bool
     {
         return mIndex != other.mIndex;
     }
 
     template <typename... Components>
-    void View<Components...>::Iterator::operator++()
+    void ECSView<Components...>::Iterator::operator++()
     {
         mIndex++;
     }
 
     template <typename... Components>
-    auto View<Components...>::Iterator::operator*() const
+    auto ECSView<Components...>::Iterator::operator*() const
     {
-        Entity entity = (*mEntities)[mIndex];
+        Entity entity = mEntities[mIndex];
 
-        return std::tuple<Entity, Components&...>(entity, *mManager->GetComponentSet<Components>()->Get(entity)...);
+        return std::tuple<Entity, Components&...>(entity, *mManager.GetComponentSet<Components>()->Get(entity)...);
     }
 
     template <typename... Components>
-    auto View<Components...>::begin() -> Iterator
+    auto ECSView<Components...>::begin() -> Iterator
     {
         return Iterator(mManager, mEntities, 0);
     }
 
     template <typename... Components>
-    auto View<Components...>::end() -> Iterator
+    auto ECSView<Components...>::end() -> Iterator
     {
         return Iterator(mManager, mEntities, mEntities.size());
     }
 
     template <typename... Components>
-    View<Components...>::View(Manager* manager)
+    ECSView<Components...>::ECSView(ECSManager& manager)
         : mManager(manager)
     {
-        auto* primarySet = mManager->GetComponentSet<std::tuple_element_t<0, std::tuple<Components...>>>();
+        auto* primarySet = mManager.GetComponentSet<std::tuple_element_t<0, std::tuple<Components...>>>();
 
         if (primarySet == nullptr)
         {
@@ -57,7 +57,7 @@ namespace Mosaic::ECS
 
         for (const Entity& entity : primarySet->Entities)
         {
-            if ((mManager->GetComponentSet<Components>()->Has(entity) and ...))
+            if ((mManager.GetComponentSet<Components>()->Has(entity) and ...))
             {
                 mEntities.push_back(entity);
             }

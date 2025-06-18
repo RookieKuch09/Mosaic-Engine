@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
     using EntityID = std::uint32_t;
     using EntityGeneration = std::uint32_t;

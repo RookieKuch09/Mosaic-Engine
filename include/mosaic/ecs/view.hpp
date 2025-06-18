@@ -5,17 +5,17 @@
 
 #include <vector>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
-    class Manager;
+    class ECSManager;
 
     template <typename... Components>
-    class View
+    class ECSView
     {
     public:
         struct Iterator
         {
-            Iterator(Manager* manager, const std::vector<Entity>& entities, std::uint32_t index);
+            Iterator(ECSManager& manager, const std::vector<Entity>& entities, std::uint32_t index);
 
             auto operator!=(const Iterator& other) const -> bool;
 
@@ -24,8 +24,8 @@ namespace Mosaic::ECS
             auto operator*() const;
 
         private:
-            Manager* mManager;
-            const std::vector<Entity>* mEntities;
+            ECSManager& mManager;
+            const std::vector<Entity>& mEntities;
             std::uint32_t mIndex;
         };
 
@@ -33,12 +33,12 @@ namespace Mosaic::ECS
         auto end() -> Iterator;
 
     private:
-        View(Manager* manager);
+        ECSView(ECSManager& manager);
 
-        Manager* mManager;
+        ECSManager& mManager;
         std::vector<Entity> mEntities;
 
-        friend class Manager;
+        friend class ECSManager;
     };
 }
 

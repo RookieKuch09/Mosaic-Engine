@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
     struct MOSAIC_PUBLIC_EXPOSURE SparseSetInterface
     {
@@ -38,8 +38,8 @@ namespace Mosaic::ECS
 
         ~SparseSet() override = default;
 
-        void Insert(Debug::Console& console, const Entity& entity, const Component& component);
-        void Remove(Debug::Console& console, const Entity& entity);
+        void Insert(Console& console, const Entity& entity, const Component& component);
+        void Remove(Console& console, const Entity& entity);
 
         [[nodiscard]] auto Get(const Entity& entity) -> Component*;
         [[nodiscard]] auto Has(const Entity& entity) const -> bool;

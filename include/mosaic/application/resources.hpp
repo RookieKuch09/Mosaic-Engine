@@ -2,18 +2,18 @@
 
 #include <mosaic/api/exposure.hpp>
 
-#include <mosaic/debug/console.hpp>
-
-#include <mosaic/ecs/manager.hpp>
-
 namespace Mosaic
 {
-    struct Resources
+    class Console;
+    class ECSManager;
+    class EventManager;
+
+    struct MOSAIC_PUBLIC_EXPOSURE Resources
     {
-        Resources();
+        Resources(Console& console, ECSManager& ecsManager, EventManager& eventManager);
 
-        Debug::Console Console;
-
-        ECS::Manager ECSManager;
+        Console& Console;
+        ECSManager& ECSManager;
+        EventManager& EventManager;
     };
 }

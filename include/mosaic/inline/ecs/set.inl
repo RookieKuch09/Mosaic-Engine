@@ -2,14 +2,14 @@
 
 #include <mosaic/ecs/set.hpp>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
     template <typename Component>
-    void SparseSet<Component>::Insert(Debug::Console& console, const Entity& entity, const Component& component)
+    void SparseSet<Component>::Insert(Console& console, const Entity& entity, const Component& component)
     {
         if (EntityIndex.contains(entity.ID))
         {
-            console.Log<Debug::Console::LogSeverity::Warning>("Entity {} already exists and cannot be recreated", entity.ID);
+            console.Log<Console::LogSeverity::Warning>("Entity {} already exists and cannot be recreated", entity.ID);
 
             return;
         }
@@ -20,11 +20,11 @@ namespace Mosaic::ECS
     }
 
     template <typename Component>
-    void SparseSet<Component>::Remove(Debug::Console& console, const Entity& entity)
+    void SparseSet<Component>::Remove(Console& console, const Entity& entity)
     {
         if (not EntityIndex.contains(entity.ID))
         {
-            console.Log<Debug::Console::LogSeverity::Warning>("Entity {} does not exist and cannot be deleted", entity.ID);
+            console.Log<Console::LogSeverity::Warning>("Entity {} does not exist and cannot be deleted", entity.ID);
 
             return;
         }

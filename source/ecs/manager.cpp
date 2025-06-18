@@ -1,13 +1,13 @@
 #include <mosaic/ecs/manager.hpp>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
-    Manager::Manager(Resources& resources, Debug::Console& console)
-        : mResources(&resources), mConsole(&console)
+    ECSManager::ECSManager(Resources& resources)
+        : mResources(resources)
     {
     }
 
-    auto Manager::CreateEntity() -> Entity
+    auto ECSManager::CreateEntity() -> Entity
     {
         EntityID entityID = 0;
 
@@ -25,7 +25,7 @@ namespace Mosaic::ECS
         return Entity{.ID = entityID, .Generation = mGenerations[entityID]};
     }
 
-    auto Manager::CreateEntities(std::uint32_t count) -> std::vector<Entity>
+    auto ECSManager::CreateEntities(std::uint32_t count) -> std::vector<Entity>
     {
         std::vector<Entity> entities;
 
@@ -39,7 +39,7 @@ namespace Mosaic::ECS
         return entities;
     }
 
-    void Manager::DestroyEntity(Entity entity)
+    void ECSManager::DestroyEntity(Entity entity)
     {
         if (not IsAlive(entity))
         {
@@ -50,7 +50,7 @@ namespace Mosaic::ECS
         mFreedIDs.push_back(entity.ID);
     }
 
-    void Manager::DestroyEntities(const std::vector<Entity>& entities)
+    void ECSManager::DestroyEntities(const std::vector<Entity>& entities)
     {
         for (const auto entity : entities)
         {
@@ -58,21 +58,21 @@ namespace Mosaic::ECS
         }
     }
 
-    auto Manager::IsAlive(Entity entity) const -> bool
+    auto ECSManager::IsAlive(Entity entity) const -> bool
     {
         return entity.ID < mGenerations.size() and mGenerations[entity.ID] == entity.Generation;
     }
 
-    void Manager::AddSystem(const System& system)
+    void ECSManager::AddSystem(const ECSSystem& system)
     {
         mSystems.push_back(system);
     }
 
-    void Manager::Update()
+    void ECSManager::Update()
     {
         for (auto& system : mSystems)
         {
-            system(*mResources);
+            system(mResources);
         }
     }
 }

@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace Mosaic::Debug
+namespace Mosaic
 {
     Console::Console()
         : mNextAvailableID(1)

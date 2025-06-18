@@ -10,3 +10,6 @@ Checks: >
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 FormatStyle: file
+
+Checks: >
+  -cppcoreguidelines-avoid-const-or-ref-data-members

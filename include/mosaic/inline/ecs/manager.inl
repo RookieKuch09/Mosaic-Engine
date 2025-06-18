@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mosaic/application/resources.hpp>
+
 #include <mosaic/debug/console.hpp>
 
 #include <mosaic/ecs/entity.hpp>
@@ -7,34 +9,10 @@
 
 #include <boost/type_index.hpp>
 
-namespace Mosaic::ECS
+namespace Mosaic
 {
-    template <typename Blueprint>
-    auto Manager::CreateEntity() -> Entity
-    {
-        Entity entity = CreateEntity();
-
-        AddComponents<Blueprint>(entity);
-
-        return entity;
-    }
-
-    template <typename Blueprint>
-    auto Manager::CreateEntities(uint32_t count) -> std::vector<Entity>
-    {
-        std::vector<Entity> entities;
-        entities.reserve(count);
-
-        for (std::uint32_t i = 0; i < count; i++)
-        {
-            entities.push_back(CreateEntity<Blueprint>());
-        }
-
-        return entities;
-    }
-
     template <typename Component>
-    void Manager::AddComponent(Entity entity, const Component& component)
+    void ECSManager::AddComponent(Entity entity, const Component& component)
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -53,24 +31,18 @@ namespace Mosaic::ECS
 
         if (not set->Has(entity))
         {
-            set->Insert(*mConsole, entity, component);
+            set->Insert(mResources.Console, entity, component);
         }
         else
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mConsole->Log<Debug::Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
+            mResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
         }
     }
 
-    template <typename Blueprint>
-    void Manager::AddComponents(Entity entity)
-    {
-        AddComponentsImpl<Blueprint>(entity, std::make_index_sequence<Blueprint::ComponentCount>{});
-    }
-
     template <typename Component>
-    void Manager::RemoveComponent(Entity entity)
+    void ECSManager::RemoveComponent(Entity entity)
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -83,24 +55,24 @@ namespace Mosaic::ECS
 
         if (set->Has(entity))
         {
-            set->Remove(*mConsole, entity);
+            set->Remove(mResources.Console, entity);
         }
         else
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mConsole->Log<Debug::Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
+            mResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
         }
     }
 
     template <typename... Components>
-    auto Manager::QueryView() -> View<Components...>
+    auto ECSManager::QueryView() -> ECSView<Components...>
     {
-        return View<Components...>(this);
+        return ECSView<Components...>(*this);
     }
 
     template <typename Component>
-    auto Manager::GetComponentSet() -> SparseSet<Component>*
+    auto ECSManager::GetComponentSet() -> SparseSet<Component>*
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -110,11 +82,5 @@ namespace Mosaic::ECS
         }
 
         return static_cast<SparseSet<Component>*>(mComponentStorage[typeIndex].get());
-    }
-
-    template <typename Blueprint, std::uint32_t... Is>
-    void Manager::AddComponentsImpl(Entity entity)
-    {
-        (AddComponent<typename Blueprint::template ComponentType<Is>>(entity, {}), ...);
     }
 }
