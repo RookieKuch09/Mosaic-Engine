@@ -1,34 +1,47 @@
 #include <mosaic/debug/console.hpp>
 
+#include <mosaic/api/pid.hpp>
+
 #include <chrono>
-#include <functional>
 #include <iostream>
 #include <sstream>
 
-#include <mosaic/api/pid.hpp>
-
 namespace Mosaic::Debug
 {
-    Console::OutputID Console::CreateFileOutput(const std::string& filepath)
+    Console::Console()
+        : mNextAvailableID(1)
     {
-        OutputID id = HashFilePath(filepath);
+    }
 
-        if (mFileOutputs.find(id) == mFileOutputs.end())
+    auto Console::CreateFileOutput(const std::string& filepath) -> Console::OutputID
+    {
+        OutputID outputID = 0;
+
+        if (not mFilepathIDs.contains(filepath))
         {
+            outputID = mNextAvailableID;
+
+            mNextAvailableID++;
+
             std::ofstream stream(filepath, std::ios::app);
 
-            // TODO: replace with engine API assertion
             if (not stream)
             {
-                throw std::runtime_error("Failed to open log file: " + filepath);
+                Throw("Failed to create or open log file {}", filepath);
             }
 
             AddInitialLogstamp(stream, filepath);
 
-            mFileOutputs.emplace(id, std::move(stream));
+            mFileOutputs.emplace(outputID, std::move(stream));
+
+            mFilepathIDs[filepath] = outputID;
+        }
+        else
+        {
+            outputID = mFilepathIDs[filepath];
         }
 
-        return id;
+        return outputID;
     }
 
     void Console::DispatchToTerminal(const std::string& message)
@@ -42,12 +55,7 @@ namespace Mosaic::Debug
         fileOutput.Stream.flush();
     }
 
-    Console::OutputID Console::HashFilePath(const std::string& filepath)
-    {
-        return static_cast<OutputID>(std::hash<std::string>{}(filepath));
-    }
-
-    std::string Console::GetTimestamp()
+    auto Console::GetTimestamp() -> std::string
     {
         auto nowTimePoint = std::chrono::system_clock::now();
         auto nowTimeT = std::chrono::system_clock::to_time_t(nowTimePoint);
@@ -65,7 +73,16 @@ namespace Mosaic::Debug
         auto pid = MOSAIC_GET_PID();
         auto timestamp = GetTimestamp();
 
-        auto sessionHeader = std::format("\n--- Log Session Started: {} | PID: {} | Filepath: {} ---\n", timestamp, pid, filepath);
+        std::ifstream checkFile(filepath, std::ios::ate | std::ios::binary);
+
+        const bool isNonEmpty = checkFile.tellg() > 0;
+
+        auto sessionHeader = std::format(
+            "{}--- Mosaic Log Session Started: {} | PID: {} | Filepath: {} ---\n",
+            isNonEmpty ? "\n" : "",
+            timestamp,
+            pid,
+            filepath);
 
         file << sessionHeader;
         file.flush();

@@ -5,7 +5,6 @@
 #include <cstdint>
 #include <format>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -22,13 +21,13 @@ namespace Mosaic
 
             static constexpr OutputID TerminalOutputID = 0;
 
-            enum class OutputType
+            enum class OutputType : std::uint8_t
             {
                 Terminal,
                 File,
             };
 
-            enum class LogSeverity
+            enum class LogSeverity : std::uint8_t
             {
                 Success,
                 Notice,
@@ -37,65 +36,22 @@ namespace Mosaic
                 Fatal,
             };
 
-            [[nodiscard]] OutputID CreateFileOutput(const std::string& filepath);
+            [[nodiscard]] auto CreateFileOutput(const std::string& filepath) -> OutputID;
 
             template <LogSeverity Severity, typename... Args>
-            inline void Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
-            {
-                std::string prefix;
+            void Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args);
 
-                switch (Severity)
-                {
-                    case LogSeverity::Success:
-                    {
-                        prefix = "[Success] ";
-                        break;
-                    }
-                    case LogSeverity::Notice:
-                    {
-                        prefix = "[Notice] ";
-                        break;
-                    }
-                    case LogSeverity::Warning:
-                    {
-                        prefix = "[Warning] ";
-                        break;
-                    }
-                    case LogSeverity::Error:
-                    {
-                        prefix = "[Error] ";
-                        break;
-                    }
-                    case LogSeverity::Fatal:
-                    {
-                        prefix = "[Fatal] ";
-                        break;
-                    }
-                }
+            template <LogSeverity Severity, typename... Args>
+            void Log(const std::format_string<Args...>& message, Args&&... args);
 
-                std::string formatted = std::format(message, std::forward<Args>(args)...);
+            template <typename... Args>
+            [[noreturn]] void Throw(const std::format_string<Args...>& message, Args&&... args);
 
-                std::string timestamp = "[" + GetTimestamp() + "] ";
-
-                if (outputID == TerminalOutputID)
-                {
-                    DispatchToTerminal(timestamp + prefix + formatted);
-                }
-                else if (auto it = mFileOutputs.find(outputID); it != mFileOutputs.end())
-                {
-                    DispatchToFile(it->second, timestamp + prefix + formatted);
-                }
-                else
-                {
-                    auto warning = std::format("OutputID {} does not exist or is unavailable. Rerouting output to terminal:", outputID);
-
-                    DispatchToTerminal(timestamp + "[Reroute] " + warning);
-                    DispatchToTerminal(timestamp + prefix + formatted);
-                }
-            }
+            template <typename... Args>
+            [[noreturn]] void Throw(OutputID outputID, const std::format_string<Args...>& message, Args&&... args);
 
         private:
-            Console() = default;
+            Console();
 
             struct FileOutput
             {
@@ -104,17 +60,23 @@ namespace Mosaic
             };
 
             std::unordered_map<OutputID, FileOutput> mFileOutputs;
+            std::unordered_map<std::string, OutputID> mFilepathIDs;
 
-            void DispatchToTerminal(const std::string& message);
-            void DispatchToFile(FileOutput& fileOutput, const std::string& message);
+            OutputID mNextAvailableID;
 
-            OutputID HashFilePath(const std::string& filepath);
+            template <LogSeverity Severity>
+            constexpr auto GetPrefix() -> std::string;
 
-            std::string GetTimestamp();
+            static void DispatchToTerminal(const std::string& message);
+            static void DispatchToFile(FileOutput& fileOutput, const std::string& message);
 
-            void AddInitialLogstamp(std::ofstream& file, const std::string& filepath);
+            static auto GetTimestamp() -> std::string;
+
+            static void AddInitialLogstamp(std::ofstream& file, const std::string& filepath);
 
             friend struct Mosaic::Resources;
         };
     }
 }
+
+#include <mosaic/inline/debug/console.inl>

@@ -16,6 +16,8 @@ file(GLOB_RECURSE MOSAIC_HEADERS "include/mosaic/*.hpp")
 
 add_library(Mosaic ${MOSAIC_SOURCES} ${MOSAIC_HEADERS})
 
+target_compile_options(Mosaic PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
 target_include_directories(Mosaic
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
