@@ -94,30 +94,9 @@ namespace Mosaic::ECS
     }
 
     template <typename... Components>
-    void Manager::ForEach(auto&& what)
+    auto Manager::QueryView() -> View<Components...>
     {
-        auto sets = std::make_tuple(GetComponentSet<Components>()...);
-
-        if (((std::get<SparseSet<Components>*>(sets) == nullptr) or ...))
-        {
-            return;
-        }
-
-        auto* primarySet = std::get<0>(sets);
-
-        for (std::uint32_t i = 0; i < primarySet->Entities.size(); i++)
-        {
-            Entity entity = primarySet->Entities[i];
-
-            bool valid = ((std::get<SparseSet<Components>*>(sets)->Has(entity)) and ...);
-
-            if (not valid)
-            {
-                continue;
-            }
-
-            what(entity, *std::get<SparseSet<Components>*>(sets)->Get(entity)...);
-        }
+        return View<Components...>(this);
     }
 
     template <typename Component>

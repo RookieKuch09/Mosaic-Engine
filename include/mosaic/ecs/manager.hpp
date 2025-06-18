@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mosaic/debug/console.hpp"
 #include <mosaic/api/exposure.hpp>
 
 #include <mosaic/ecs/entity.hpp>
@@ -26,6 +25,9 @@ namespace Mosaic
 
     namespace ECS
     {
+        template <typename... Components>
+        class View;
+
         using System = std::function<void(Resources&)>;
 
         template <typename... Components>
@@ -75,7 +77,7 @@ namespace Mosaic
             [[nodiscard]] auto IsAlive(Entity entity) const -> bool;
 
             template <typename... Components>
-            void ForEach(auto&& what);
+            auto QueryView() -> View<Components...>;
 
             void AddSystem(const System& system);
 
@@ -105,6 +107,9 @@ namespace Mosaic
             friend class Mosaic::Instance;
 
             friend struct Mosaic::Resources;
+
+            template <typename... Components>
+            friend class View;
         };
     };
 }
