@@ -125,7 +125,7 @@ namespace Mosaic
             }
         }
 
-        return "[UNKNOWN] --";
+        return " [UNKNOWN] --> ";
     }
 
     template <Console::LogSeverity Severity>
@@ -151,7 +151,7 @@ namespace Mosaic
             }
         }
 
-        return "[UNKNOWN] --";
+        return " [UNKNOWN] --> ";
     }
 
     template <Console::LogSeverity Severity>
