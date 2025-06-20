@@ -53,10 +53,10 @@ namespace Mosaic
         EventManager(Resources& resources);
 
         template <typename Event, typename... Components>
-        auto MakeResponderAdapter(EventResponder<Event, Components...> responder) -> EventResponderAdapter;
+        EventResponderAdapter MakeResponderAdapter(EventResponder<Event, Components...> responder);
 
         template <typename Event>
-        auto MakeResponderAdapter(SimpleEventResponder<Event> responder) -> EventResponderAdapter;
+        EventResponderAdapter MakeResponderAdapter(SimpleEventResponder<Event> responder);
 
         void Update();
 

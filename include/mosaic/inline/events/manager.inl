@@ -52,7 +52,7 @@ namespace Mosaic
     }
 
     template <typename Event, typename... Components>
-    auto EventManager::MakeResponderAdapter(EventResponder<Event, Components...> responder) -> EventResponderAdapter
+    EventManager::EventResponderAdapter EventManager::MakeResponderAdapter(EventResponder<Event, Components...> responder)
     {
         return [userFn = std::move(responder), this](Resources& resources, std::any& eventData)
         {
@@ -65,7 +65,7 @@ namespace Mosaic
     }
 
     template <typename Event>
-    auto EventManager::MakeResponderAdapter(SimpleEventResponder<Event> responder) -> EventResponderAdapter
+    EventManager::EventResponderAdapter EventManager::MakeResponderAdapter(SimpleEventResponder<Event> responder)
     {
         return [userFn = std::move(responder)](Resources& resources, std::any& eventData)
         {

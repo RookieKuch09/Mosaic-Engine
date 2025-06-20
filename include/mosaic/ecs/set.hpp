@@ -2,7 +2,7 @@
 
 #include <mosaic/debug/console.hpp>
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 #include <mosaic/ecs/entity.hpp>
 
@@ -17,10 +17,10 @@ namespace Mosaic
         SparseSetInterface() = default;
 
         SparseSetInterface(const SparseSetInterface& other) = default;
-        auto operator=(const SparseSetInterface& other) -> SparseSetInterface& = default;
+        SparseSetInterface& operator=(const SparseSetInterface& other) = default;
 
         SparseSetInterface(SparseSetInterface&& other) noexcept = default;
-        auto operator=(SparseSetInterface&& other) noexcept -> SparseSetInterface& = default;
+        SparseSetInterface& operator=(SparseSetInterface&& other) noexcept = default;
 
         virtual ~SparseSetInterface() = default;
     };
@@ -31,18 +31,18 @@ namespace Mosaic
         SparseSet() = default;
 
         SparseSet(const SparseSet& other) = default;
-        auto operator=(const SparseSet& other) -> SparseSet& = default;
+        SparseSet& operator=(const SparseSet& other) = default;
 
         SparseSet(SparseSet&& other) noexcept = default;
-        auto operator=(SparseSet&& other) noexcept -> SparseSet& = default;
+        SparseSet& operator=(SparseSet&& other) noexcept = default;
 
         ~SparseSet() override = default;
 
         void Insert(Console& console, const Entity& entity, const Component& component);
         void Remove(Console& console, const Entity& entity);
 
-        [[nodiscard]] auto Get(const Entity& entity) -> Component*;
-        [[nodiscard]] auto Has(const Entity& entity) const -> bool;
+        [[nodiscard]] Component* Get(const Entity& entity);
+        [[nodiscard]] bool Has(const Entity& entity) const;
 
         std::vector<Component> Components;
         std::vector<Entity> Entities;

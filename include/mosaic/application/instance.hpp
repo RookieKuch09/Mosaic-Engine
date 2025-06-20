@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 #include <mosaic/application/application.hpp>
 #include <mosaic/application/resources.hpp>
@@ -29,7 +29,7 @@ namespace Mosaic
 
         void Setup();
 
-        auto Run() -> std::int32_t;
+        std::int32_t Run();
 
     private:
         void OnApplicationExit(Resources&, const ApplicationExitEvent& event);

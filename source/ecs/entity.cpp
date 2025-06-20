@@ -2,7 +2,7 @@
 
 namespace Mosaic
 {
-    auto Entity::operator==(const Entity& other) const -> bool
+    bool Entity::operator==(const Entity& other) const
     {
         return ID == other.ID and Generation == other.Generation;
     }

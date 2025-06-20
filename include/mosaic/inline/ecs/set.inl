@@ -42,7 +42,7 @@ namespace Mosaic
     }
 
     template <typename Component>
-    auto SparseSet<Component>::Get(const Entity& entity) -> Component*
+    Component* SparseSet<Component>::Get(const Entity& entity)
     {
         if (not EntityIndex.contains(entity.ID))
         {
@@ -53,7 +53,7 @@ namespace Mosaic
     }
 
     template <typename Component>
-    auto SparseSet<Component>::Has(const Entity& entity) const -> bool
+    bool SparseSet<Component>::Has(const Entity& entity) const
     {
         return EntityIndex.contains(entity.ID);
     }

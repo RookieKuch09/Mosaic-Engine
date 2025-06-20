@@ -1,6 +1,6 @@
 #include <mosaic/debug/console.hpp>
 
-#include <mosaic/api/pid.hpp>
+#include <mosaic/macros/pid.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -9,11 +9,11 @@
 namespace Mosaic
 {
     Console::Console()
-        : mNextAvailableID(1)
+        : mNextAvailableID(0)
     {
     }
 
-    auto Console::CreateFileOutput(const std::string& filepath) -> Console::OutputID
+    Console::OutputID Console::CreateFileOutput(const std::string& filepath)
     {
         OutputID outputID = 0;
 
@@ -27,7 +27,7 @@ namespace Mosaic
 
             if (not stream)
             {
-                Throw("Failed to create or open log file {}", filepath);
+                Halt(stream.is_open(), "Failed to create or open log file {}", filepath);
             }
 
             AddInitialLogstamp(stream, filepath);
@@ -44,6 +44,21 @@ namespace Mosaic
         return outputID;
     }
 
+    std::string Console::GetTerminalRedirect(OutputID outputID)
+    {
+        return GetTimestampForTerminalOutput() + std::format(" {}{}[REDIRECT] ->{} OutputID {} does not exist or is unavailable. Output will be redirected to the terminal", ANSI_BRIGHT_CYAN, ANSI_BOLD, ANSI_RESET, outputID);
+    }
+
+    std::string Console::GetFullPrefixForFileHalt()
+    {
+        return GetTimestampForFileOutput() + " [HALT] -----> ";
+    }
+
+    std::string Console::GetFullPrefixForTerminalHalt()
+    {
+        return GetTimestampForTerminalOutput() + std::format(" {}{}[HALT] ----->{} ", ANSI_BRIGHT_RED, ANSI_BOLD, ANSI_RESET);
+    }
+
     void Console::DispatchToTerminal(const std::string& message)
     {
         std::cout << message << '\n';
@@ -55,7 +70,7 @@ namespace Mosaic
         fileOutput.Stream.flush();
     }
 
-    auto Console::GetTimestamp() -> std::string
+    std::string Console::GetTimestampForLogstamp()
     {
         auto nowTimePoint = std::chrono::system_clock::now();
         auto nowTimeT = std::chrono::system_clock::to_time_t(nowTimePoint);
@@ -68,10 +83,36 @@ namespace Mosaic
         return buffer.str();
     }
 
+    std::string Console::GetTimestampForFileOutput()
+    {
+        auto nowTimePoint = std::chrono::system_clock::now();
+        auto nowTimeT = std::chrono::system_clock::to_time_t(nowTimePoint);
+        auto localTime = *std::localtime(&nowTimeT);
+
+        std::ostringstream buffer;
+
+        buffer << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+
+        return buffer.str();
+    }
+
+    std::string Console::GetTimestampForTerminalOutput()
+    {
+        auto nowTimePoint = std::chrono::system_clock::now();
+        auto nowTimeT = std::chrono::system_clock::to_time_t(nowTimePoint);
+        auto localTime = *std::localtime(&nowTimeT);
+
+        std::ostringstream buffer;
+
+        buffer << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
+
+        return ANSI_CYAN + buffer.str() + ANSI_RESET;
+    }
+
     void Console::AddInitialLogstamp(std::ofstream& file, const std::string& filepath)
     {
         auto pid = MOSAIC_GET_PID();
-        auto timestamp = GetTimestamp();
+        auto timestamp = GetTimestampForLogstamp();
 
         std::ifstream checkFile(filepath, std::ios::ate | std::ios::binary);
 

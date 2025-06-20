@@ -13,7 +13,7 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    auto ECSView<Components...>::Iterator::operator!=(const Iterator& other) const -> bool
+    bool ECSView<Components...>::Iterator::operator!=(const Iterator& other) const
     {
         return mIndex != other.mIndex;
     }
@@ -25,7 +25,7 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    auto ECSView<Components...>::Iterator::operator*() const
+    std::tuple<Entity, Components&...> ECSView<Components...>::Iterator::operator*() const
     {
         Entity entity = mEntities[mIndex];
 
@@ -33,13 +33,13 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    auto ECSView<Components...>::begin() -> Iterator
+    ECSView<Components...>::Iterator ECSView<Components...>::begin()
     {
         return Iterator(mManager, mEntities, 0);
     }
 
     template <typename... Components>
-    auto ECSView<Components...>::end() -> Iterator
+    ECSView<Components...>::Iterator ECSView<Components...>::end()
     {
         return Iterator(mManager, mEntities, mEntities.size());
     }

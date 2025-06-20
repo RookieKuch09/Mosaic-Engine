@@ -5,102 +5,164 @@
 namespace Mosaic
 {
     template <Console::LogSeverity Severity, typename... Args>
-    void Console::Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    void Console::Log(const std::format_string<Args...>& message, Args&&... args)
     {
-        std::string prefix = GetPrefix<Severity>();
         std::string formatted = std::format(message, std::forward<Args>(args)...);
-        std::string timestamp = "[" + GetTimestamp() + "]";
+        std::string outputMessage = GetFullPrefixForTerminalOutput<Severity>() + formatted;
 
-        if (outputID == TerminalOutputID)
-        {
-            DispatchToTerminal(timestamp + prefix + formatted);
-        }
-        else if (mFileOutputs.contains(outputID))
-        {
-            DispatchToFile(mFileOutputs[outputID], timestamp + prefix + formatted);
-        }
-        else
-        {
-            auto warning = std::format("OutputID {} does not exist or is unavailable. Rerouting output to terminal:", outputID);
-
-            DispatchToTerminal(timestamp + " [Reroute] " + warning);
-            DispatchToTerminal(timestamp + prefix + formatted);
-        }
+        DispatchToTerminal(outputMessage);
     }
 
     template <Console::LogSeverity Severity, typename... Args>
-    void Console::Log(const std::format_string<Args...>& message, Args&&... args)
-    {
-        std::string prefix = GetPrefix<Severity>();
-        std::string formatted = std::format(message, std::forward<Args>(args)...);
-        std::string timestamp = "[" + GetTimestamp() + "]";
-
-        DispatchToTerminal(timestamp + prefix + formatted);
-    }
-
-    template <typename... Args>
-    void Console::Throw(const std::format_string<Args...>& message, Args&&... args)
+    void Console::Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
-        std::string timestamp = "[" + GetTimestamp() + "]";
 
-        DispatchToTerminal(timestamp + " [Throw] " + formatted);
-
-        std::exit(1);
-    }
-
-    template <typename... Args>
-    void Console::Throw(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
-    {
-        std::string formatted = std::format(message, std::forward<Args>(args)...);
-        std::string timestamp = "[" + GetTimestamp() + "]";
-
-        if (outputID == TerminalOutputID)
+        if (mFileOutputs.contains(outputID))
         {
-            DispatchToTerminal(timestamp + " [Throw] " + formatted);
-        }
-        else if (auto file = mFileOutputs.find(outputID); file != mFileOutputs.end())
-        {
-            DispatchToFile(file->second, timestamp + " [Throw] " + formatted);
+            std::string outputMessage = GetFullPrefixForFileOutput<Severity>() + formatted;
+
+            DispatchToFile(mFileOutputs[outputID], outputMessage);
         }
         else
         {
-            auto warning = std::format("OutputID {} does not exist or is unavailable. Rerouting output to terminal:", outputID);
+            std::string redirectMessage = GetTerminalRedirect(outputID);
+            std::string outputMessage = GetFullPrefixForTerminalOutput<Severity>() + formatted;
 
-            DispatchToTerminal(timestamp + " [Reroute] " + warning);
-            DispatchToTerminal(timestamp + " [Throw] " + formatted);
+            DispatchToTerminal(redirectMessage);
+            DispatchToTerminal(outputMessage);
+        }
+    }
+
+    template <typename... Args>
+    void Console::Halt(const std::format_string<Args...>& message, Args&&... args)
+    {
+        std::string formatted = std::format(message, std::forward<Args>(args)...);
+        std::string haltMessage = GetFullPrefixForTerminalHalt() + formatted;
+
+        DispatchToTerminal(haltMessage);
+
+        std::exit(1);
+    }
+
+    template <typename... Args>
+    void Console::Halt(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    {
+        std::string formatted = std::format(message, std::forward<Args>(args)...);
+
+        if (mFileOutputs.contains(outputID))
+        {
+            std::string haltMessage = GetFullPrefixForFileHalt() + formatted;
+
+            DispatchToFile(mFileOutputs[outputID], haltMessage);
+        }
+        else
+        {
+            std::string redirectMessage = GetTerminalRedirect(outputID);
+            std::string haltMessage = GetFullPrefixForTerminalHalt() + formatted;
+
+            DispatchToTerminal(redirectMessage);
+            DispatchToTerminal(haltMessage);
         }
 
         std::exit(1);
     }
 
+    template <typename... Args>
+    void Console::Halt(std::int32_t exitCode, const std::format_string<Args...>& message, Args&&... args)
+    {
+        std::string formatted = std::format(message, std::forward<Args>(args)...);
+        std::string haltMessage = GetFullPrefixForTerminalHalt() + formatted;
+
+        DispatchToTerminal(haltMessage);
+
+        std::exit(exitCode);
+    }
+
+    template <typename... Args>
+    void Console::Halt(std::int32_t exitCode, OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    {
+        std::string formatted = std::format(message, std::forward<Args>(args)...);
+
+        if (mFileOutputs.contains(outputID))
+        {
+            std::string haltMessage = GetFullPrefixForFileHalt() + formatted;
+
+            DispatchToFile(mFileOutputs[outputID], haltMessage);
+        }
+        else
+        {
+            std::string redirectMessage = GetTerminalRedirect(outputID);
+            std::string haltMessage = GetFullPrefixForTerminalHalt() + formatted;
+
+            DispatchToTerminal(redirectMessage);
+            DispatchToTerminal(haltMessage);
+        }
+
+        std::exit(exitCode);
+    }
+
     template <Console::LogSeverity Severity>
-    constexpr auto Console::GetPrefix() -> std::string
+    constexpr std::string Console::GetSeverityPrefixForFileOutput()
     {
         switch (Severity)
         {
             case LogSeverity::Success:
             {
-                return " [Success] ";
+                return "[SUCCESS] --";
             }
             case LogSeverity::Notice:
             {
-                return " [Notice] ";
+                return "[NOTICE] ---";
             }
             case LogSeverity::Warning:
             {
-                return " [Warning] ";
+                return "[WARNING] --";
             }
             case LogSeverity::Error:
             {
-                return " [Error] ";
-            }
-            case LogSeverity::Fatal:
-            {
-                return " [Fatal] ";
+                return "[ERROR] ----";
             }
         }
 
-        return " [Unknown] ";
+        return "[UNKNOWN] --";
+    }
+
+    template <Console::LogSeverity Severity>
+    constexpr std::string Console::GetSeverityPrefixForTerminalOutput()
+    {
+        switch (Severity)
+        {
+            case LogSeverity::Success:
+            {
+                return std::format(" {}{}[SUCCESS] --> ", ANSI_GREEN, ANSI_BOLD);
+            }
+            case LogSeverity::Notice:
+            {
+                return std::format(" {}{}[NOTICE] ---> ", ANSI_BLUE, ANSI_BOLD);
+            }
+            case LogSeverity::Warning:
+            {
+                return std::format(" {}{}[WARNING] --> ", ANSI_YELLOW, ANSI_BOLD);
+            }
+            case LogSeverity::Error:
+            {
+                return std::format(" {}{}[ERROR] ----> ", ANSI_RED, ANSI_BOLD);
+            }
+        }
+
+        return "[UNKNOWN] --";
+    }
+
+    template <Console::LogSeverity Severity>
+    std::string Console::GetFullPrefixForFileOutput()
+    {
+        return GetTimestampForFileOutput() + GetSeverityPrefixForFileOutput<Severity>() + ANSI_RESET;
+    }
+
+    template <Console::LogSeverity Severity>
+    std::string Console::GetFullPrefixForTerminalOutput()
+    {
+        return GetTimestampForTerminalOutput() + GetSeverityPrefixForTerminalOutput<Severity>() + ANSI_RESET;
     }
 }

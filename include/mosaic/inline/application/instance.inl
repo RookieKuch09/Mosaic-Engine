@@ -19,7 +19,7 @@ namespace Mosaic
     }
 
     template <typename T> requires std::is_base_of_v<Application, T>
-    auto Instance<T>::Run() -> std::int32_t
+    std::int32_t Instance<T>::Run()
     {
         while (mRunning)
         {

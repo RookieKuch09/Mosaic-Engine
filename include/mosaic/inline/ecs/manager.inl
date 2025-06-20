@@ -66,13 +66,13 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    auto ECSManager::QueryView() -> ECSView<Components...>
+    ECSView<Components...> ECSManager::QueryView()
     {
         return ECSView<Components...>(*this);
     }
 
     template <typename Component>
-    auto ECSManager::GetComponentSet() -> SparseSet<Component>*
+    SparseSet<Component>* ECSManager::GetComponentSet()
     {
         auto typeIndex = std::type_index(typeid(Component));
 

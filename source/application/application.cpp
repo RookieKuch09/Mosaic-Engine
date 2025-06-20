@@ -7,7 +7,7 @@ namespace Mosaic
     {
     }
 
-    auto Application::GetApplicationResources() -> Resources&
+    Resources& Application::GetApplicationResources()
     {
         return *mApplicationResources;
     }

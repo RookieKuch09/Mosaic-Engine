@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 namespace Mosaic
 {

@@ -7,7 +7,7 @@ namespace Mosaic
     {
     }
 
-    auto ECSManager::CreateEntity() -> Entity
+    Entity ECSManager::CreateEntity()
     {
         EntityID entityID = 0;
 
@@ -25,7 +25,7 @@ namespace Mosaic
         return Entity{.ID = entityID, .Generation = mGenerations[entityID]};
     }
 
-    auto ECSManager::CreateEntities(std::uint32_t count) -> std::vector<Entity>
+    std::vector<Entity> ECSManager::CreateEntities(std::uint32_t count)
     {
         std::vector<Entity> entities;
 
@@ -41,7 +41,7 @@ namespace Mosaic
 
     void ECSManager::DestroyEntity(Entity entity)
     {
-        if (not IsAlive(entity))
+        if (not EntityExists(entity))
         {
             return;
         }
@@ -58,7 +58,7 @@ namespace Mosaic
         }
     }
 
-    auto ECSManager::IsAlive(Entity entity) const -> bool
+    bool ECSManager::EntityExists(Entity entity) const
     {
         return entity.ID < mGenerations.size() and mGenerations[entity.ID] == entity.Generation;
     }

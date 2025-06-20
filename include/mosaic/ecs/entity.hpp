@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 #include <cstdint>
 
@@ -14,6 +14,6 @@ namespace Mosaic
         EntityID ID;
         EntityGeneration Generation;
 
-        auto operator==(const Entity& other) const -> bool;
+        bool operator==(const Entity& other) const;
     };
 }

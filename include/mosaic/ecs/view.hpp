@@ -17,11 +17,11 @@ namespace Mosaic
         {
             Iterator(ECSManager& manager, const std::vector<Entity>& entities, std::uint32_t index);
 
-            auto operator!=(const Iterator& other) const -> bool;
+            bool operator!=(const Iterator& other) const;
 
             void operator++();
 
-            auto operator*() const;
+            std::tuple<Entity, Components&...> operator*() const;
 
         private:
             ECSManager& mManager;
@@ -29,8 +29,8 @@ namespace Mosaic
             std::uint32_t mIndex;
         };
 
-        auto begin() -> Iterator;
-        auto end() -> Iterator;
+        Iterator begin();
+        Iterator end();
 
     private:
         ECSView(ECSManager& manager);

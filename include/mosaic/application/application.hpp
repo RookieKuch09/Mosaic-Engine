@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 #include <type_traits>
 
@@ -14,8 +14,8 @@ namespace Mosaic
         Application(const Application& other) = delete;
         Application(Application&& other) noexcept = default;
 
-        auto operator=(const Application& other) -> Application& = delete;
-        auto operator=(Application&& other) noexcept -> Application& = default;
+        Application& operator=(const Application& other) = delete;
+        Application& operator=(Application&& other) noexcept = default;
 
         virtual ~Application() = default;
 
@@ -24,7 +24,7 @@ namespace Mosaic
     protected:
         Application(Resources& resources);
 
-        auto GetApplicationResources() -> Resources&;
+        Resources& GetApplicationResources();
 
     private:
         Resources* mApplicationResources;

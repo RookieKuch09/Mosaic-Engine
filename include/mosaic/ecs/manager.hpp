@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mosaic/api/exposure.hpp>
+#include <mosaic/macros/exposure.hpp>
 
 #include <mosaic/ecs/entity.hpp>
 #include <mosaic/ecs/set.hpp>
@@ -36,9 +36,9 @@ namespace Mosaic
 
         ~ECSManager() = default;
 
-        [[nodiscard]] auto CreateEntity() -> Entity;
+        [[nodiscard]] Entity CreateEntity();
 
-        [[nodiscard]] auto CreateEntities(std::uint32_t count) -> std::vector<Entity>;
+        [[nodiscard]] std::vector<Entity> CreateEntities(std::uint32_t count);
 
         template <typename Component>
         void AddComponent(Entity entity, const Component& component = Component{});
@@ -50,10 +50,10 @@ namespace Mosaic
 
         void DestroyEntities(const std::vector<Entity>& entities);
 
-        [[nodiscard]] auto IsAlive(Entity entity) const -> bool;
+        [[nodiscard]] bool EntityExists(Entity entity) const;
 
         template <typename... Components>
-        auto QueryView() -> ECSView<Components...>;
+        [[nodiscard]] ECSView<Components...> QueryView();
 
         void AddSystem(const ECSSystem& system);
 
@@ -63,7 +63,7 @@ namespace Mosaic
         void Update();
 
         template <typename Component>
-        auto GetComponentSet() -> SparseSet<Component>*;
+        SparseSet<Component>* GetComponentSet();
 
         std::unordered_map<std::type_index, std::unique_ptr<SparseSetInterface>> mComponentStorage;
 
