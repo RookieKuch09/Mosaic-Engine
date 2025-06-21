@@ -2,12 +2,12 @@
 
 namespace Mosaic
 {
-    Application::Application(Resources& resources)
+    Application::Application(ApplicationResources& resources)
         : mApplicationResources(&resources)
     {
     }
 
-    Resources& Application::GetApplicationResources()
+    ApplicationResources& Application::GetApplicationResources()
     {
         return *mApplicationResources;
     }

@@ -2,8 +2,8 @@
 
 namespace Mosaic
 {
-    Resources::Resources(class Console& console, class ECSManager& ecsManager, class EventManager& eventManager)
-        : Console(console), ECSManager(ecsManager), EventManager(eventManager)
+    ApplicationResources::ApplicationResources(class Console& console, class Window& window, class ECSManager& ecsManager, class EventManager& eventManager)
+        : Console(console), Window(window), ECSManager(ecsManager), EventManager(eventManager)
     {
     }
 }

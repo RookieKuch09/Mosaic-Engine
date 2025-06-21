@@ -14,7 +14,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(GLOB_RECURSE MOSAIC_SOURCES "source/*.cpp")
 file(GLOB_RECURSE MOSAIC_HEADERS "include/mosaic/*.hpp")
 
+find_package(glfw3 REQUIRED)
+
 add_library(Mosaic ${MOSAIC_SOURCES} ${MOSAIC_HEADERS})
+
+target_link_libraries(Mosaic PUBLIC glfw)
 
 target_compile_options(Mosaic PRIVATE -Wall -Wextra -Wpedantic -Werror)
 

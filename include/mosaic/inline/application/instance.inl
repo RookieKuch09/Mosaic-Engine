@@ -6,7 +6,7 @@ namespace Mosaic
 {
     template <typename T> requires std::is_base_of_v<Application, T>
     Instance<T>::Instance()
-        : mInstance(mResources), mResources(mConsole, mECSManager, mEventManager), mECSManager(mResources), mEventManager(mResources), mRunning(true)
+        : mInstance(mApplicationResources), mApplicationResources(mConsole, mWindow, mECSManager, mEventManager), mECSManager(mApplicationResources), mEventManager(mApplicationResources), mRunning(true), mWindow(mApplicationResources)
     {
     }
 
@@ -23,6 +23,8 @@ namespace Mosaic
     {
         while (mRunning)
         {
+            mWindow.Update();
+
             mECSManager.Update();
             mEventManager.Update();
         }
@@ -31,7 +33,7 @@ namespace Mosaic
     }
 
     template <typename T> requires std::is_base_of_v<Application, T>
-    void Instance<T>::OnApplicationExit(Resources&, const ApplicationExitEvent& event)
+    void Instance<T>::OnApplicationExit(ApplicationResources&, const ApplicationExitEvent& event)
     {
         mRunning = false;
 

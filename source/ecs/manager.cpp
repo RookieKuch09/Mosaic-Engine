@@ -2,8 +2,8 @@
 
 namespace Mosaic
 {
-    ECSManager::ECSManager(Resources& resources)
-        : mResources(resources)
+    ECSManager::ECSManager(ApplicationResources& resources)
+        : mApplicationResources(resources)
     {
     }
 
@@ -72,7 +72,7 @@ namespace Mosaic
     {
         for (auto& system : mSystems)
         {
-            system(mResources);
+            system(mApplicationResources);
         }
     }
 }

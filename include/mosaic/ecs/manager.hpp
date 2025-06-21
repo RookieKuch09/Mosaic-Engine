@@ -12,7 +12,7 @@
 
 namespace Mosaic
 {
-    struct Resources;
+    struct ApplicationResources;
     class Application;
 
     template <typename T> requires std::is_base_of_v<Application, T>
@@ -23,7 +23,7 @@ namespace Mosaic
     template <typename... Components>
     class ECSView;
 
-    using ECSSystem = std::function<void(Resources&)>;
+    using ECSSystem = std::function<void(ApplicationResources&)>;
 
     class MOSAIC_PUBLIC_EXPOSURE ECSManager
     {
@@ -58,7 +58,7 @@ namespace Mosaic
         void AddSystem(const ECSSystem& system);
 
     private:
-        ECSManager(Resources& resources);
+        ECSManager(ApplicationResources& resources);
 
         void Update();
 
@@ -71,7 +71,7 @@ namespace Mosaic
         std::vector<EntityGeneration> mGenerations;
         std::vector<EntityID> mFreedIDs;
 
-        Resources& mResources;
+        ApplicationResources& mApplicationResources;
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;

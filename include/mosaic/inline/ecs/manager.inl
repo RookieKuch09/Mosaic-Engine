@@ -31,13 +31,13 @@ namespace Mosaic
 
         if (not set->Has(entity))
         {
-            set->Insert(mResources.Console, entity, component);
+            set->Insert(mApplicationResources.Console, entity, component);
         }
         else
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
+            mApplicationResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
         }
     }
 
@@ -55,13 +55,13 @@ namespace Mosaic
 
         if (set->Has(entity))
         {
-            set->Remove(mResources.Console, entity);
+            set->Remove(mApplicationResources.Console, entity);
         }
         else
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
+            mApplicationResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
         }
     }
 

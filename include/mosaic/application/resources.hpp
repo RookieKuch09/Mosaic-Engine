@@ -5,14 +5,18 @@
 namespace Mosaic
 {
     class Console;
+    class Window;
+
     class ECSManager;
     class EventManager;
 
-    struct MOSAIC_PUBLIC_EXPOSURE Resources
+    struct MOSAIC_PUBLIC_EXPOSURE ApplicationResources
     {
-        Resources(Console& console, ECSManager& ecsManager, EventManager& eventManager);
+        ApplicationResources(Console& console, Window& window, ECSManager& ecsManager, EventManager& eventManager);
 
         Console& Console;
+        Window& Window;
+
         ECSManager& ECSManager;
         EventManager& EventManager;
     };

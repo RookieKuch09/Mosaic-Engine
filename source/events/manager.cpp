@@ -2,8 +2,8 @@
 
 namespace Mosaic
 {
-    EventManager::EventManager(Resources& resources)
-        : mResources(resources)
+    EventManager::EventManager(ApplicationResources& resources)
+        : mApplicationResources(resources)
     {
     }
 
@@ -30,7 +30,7 @@ namespace Mosaic
 
                 for (auto& responder : responders)
                 {
-                    responder(mResources, storedEvent);
+                    responder(mApplicationResources, storedEvent);
                 }
 
                 eventQueue.pop();

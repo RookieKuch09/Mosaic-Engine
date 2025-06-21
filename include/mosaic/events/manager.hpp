@@ -10,7 +10,7 @@
 
 namespace Mosaic
 {
-    struct Resources;
+    struct ApplicationResources;
 
     class Application;
 
@@ -21,10 +21,10 @@ namespace Mosaic
     class Instance;
 
     template <typename Event, typename... Components>
-    using EventResponder = std::function<void(Resources&, const Event&, ECSView<Components...>)>;
+    using EventResponder = std::function<void(ApplicationResources&, const Event&, ECSView<Components...>)>;
 
     template <typename Event>
-    using SimpleEventResponder = std::function<void(Resources&, const Event&)>;
+    using SimpleEventResponder = std::function<void(ApplicationResources&, const Event&)>;
 
     class EventManager
     {
@@ -36,21 +36,21 @@ namespace Mosaic
         void AddResponder(const SimpleEventResponder<Event>& responder);
 
         template <typename Event, typename... Components>
-        void AddResponder(void (*responder)(Resources&, const Event&, ECSView<Components...>));
+        void AddResponder(void (*responder)(ApplicationResources&, const Event&, ECSView<Components...>));
 
         template <typename Event>
-        void AddResponder(void (*responder)(Resources&, const Event&));
+        void AddResponder(void (*responder)(ApplicationResources&, const Event&));
 
         template <typename T, typename Event>
-        void AddResponder(T* instance, void (T::*responder)(Resources&, const Event&));
+        void AddResponder(T* instance, void (T::*responder)(ApplicationResources&, const Event&));
 
-        template <typename Event>
-        void Emit(const Event& event);
+        template <typename Event, typename... Args>
+        void Emit(Args&&... args);
 
     private:
-        using EventResponderAdapter = std::function<void(Resources&, std::any& eventData)>;
+        using EventResponderAdapter = std::function<void(ApplicationResources&, std::any& eventData)>;
 
-        EventManager(Resources& resources);
+        EventManager(ApplicationResources& resources);
 
         template <typename Event, typename... Components>
         EventResponderAdapter MakeResponderAdapter(EventResponder<Event, Components...> responder);
@@ -63,7 +63,7 @@ namespace Mosaic
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
 
-        Resources& mResources;
+        ApplicationResources& mApplicationResources;
 
         using EventQueueType = std::unordered_map<std::type_index, std::queue<std::any>>;
         using ResponderMapType = std::unordered_map<std::type_index, std::vector<EventResponderAdapter>>;

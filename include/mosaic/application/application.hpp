@@ -2,11 +2,17 @@
 
 #include <mosaic/macros/exposure.hpp>
 
+#include <cstdint>
 #include <type_traits>
 
 namespace Mosaic
 {
-    struct Resources;
+    struct ApplicationExitEvent
+    {
+        std::int32_t ExitCode;
+    };
+
+    struct ApplicationResources;
 
     class MOSAIC_PUBLIC_EXPOSURE Application
     {
@@ -22,12 +28,12 @@ namespace Mosaic
         virtual void Setup() = 0;
 
     protected:
-        Application(Resources& resources);
+        Application(ApplicationResources& resources);
 
-        Resources& GetApplicationResources();
+        ApplicationResources& GetApplicationResources();
 
     private:
-        Resources* mApplicationResources;
+        ApplicationResources* mApplicationResources;
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
