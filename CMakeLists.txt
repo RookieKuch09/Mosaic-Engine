@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 file(GLOB_RECURSE MOSAIC_SOURCES "source/*.cpp")
-file(GLOB_RECURSE MOSAIC_HEADERS "include/mosaic/*.hpp")
+file(GLOB_RECURSE MOSAIC_HEADERS "include/Mosaic/*.hpp" "include/Mosaic/*.inl")
 
 find_package(glfw3 REQUIRED)
 
@@ -29,10 +29,10 @@ target_include_directories(Mosaic
 )
 
 install(CODE "
-    file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/include/mosaic\")
+    file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/include/Mosaic\")
 ")
 
-install(DIRECTORY include/mosaic DESTINATION include)
+install(DIRECTORY include/Mosaic DESTINATION include)
 
 install(TARGETS Mosaic
     EXPORT MosaicTargets
