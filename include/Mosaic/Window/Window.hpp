@@ -1,13 +1,28 @@
 #pragma once
 
-#include <Mosaic/Window/Resources.hpp>
+#include <Mosaic/Window/Events.hpp>
 
 #include <Mosaic/Macros/Exposure.hpp>
 
+#include <glm/glm.hpp>
+
+#include <string>
+#include <type_traits>
+
 namespace Mosaic
 {
+    enum class WindowVisibility
+    {
+        Minimised,
+        Windowed,
+        Fullscreen,
+        Borderless,
+        Destroy,
+    };
+
     class Application;
     class InstanceResources;
+    class WindowBackend;
 
     class MOSAIC_PUBLIC_EXPOSURE Window
     {
@@ -18,73 +33,31 @@ namespace Mosaic
         Window& operator=(const Window& other) = delete;
         Window& operator=(Window&& other) noexcept = delete;
 
-        WindowResources& GetResources();
-        const WindowResources& GetResources() const;
-
     private:
-        class Backend
-        {
-        private:
-            struct Storage;
-
-            Backend(WindowResources& windowResources, InstanceResources& instanceResources);
-            ~Backend();
-
-            void Create();
-            void Destroy();
-
-            void GetState();
-            void SetState();
-
-            void SetSize(WindowSize size);
-            void SetPosition(WindowPosition position);
-            void SetTitle(WindowTitle title);
-            void SetVisibility(WindowVisibility visibility);
-
-            void Update();
-
-            friend class Window;
-
-            Storage* mStorage;
-
-            WindowResources& mWindowResources;
-            InstanceResources& mInstanceResources;
-        };
-
         Window(InstanceResources& resources);
         ~Window();
 
-        void Setup();
         void Update();
 
-        Backend mBackend;
+        void UpdateComponents();
 
-        WindowResources mWindowResources;
-        WindowResources mWindowResourcesCopy;
+        void OnWindowSizeChangeRequest(InstanceResources&, const WindowSizeChangeRequest& request);
+        void OnWindowPositionChangeRequest(InstanceResources&, const WindowPositionChangeRequest& request);
+        void OnWindowTitleChangeRequest(InstanceResources&, const WindowTitleChangeRequest& request);
+        void OnWindowVisibilityChangeRequest(InstanceResources&, const WindowVisibilityChangeRequest& request);
+
+        WindowBackend* mBackend;
+
+        glm::uvec2 mSize;
+        glm::uvec2 mPosition;
+
+        std::string mTitle;
+
+        WindowVisibility mVisibility;
 
         InstanceResources& mInstanceResources;
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
-    };
-
-    struct WindowSizeChangeEvent
-    {
-        WindowSize Size;
-    };
-
-    struct WindowPositionChangeEvent
-    {
-        WindowPosition Position;
-    };
-
-    struct WindowVisibilityChangeEvent
-    {
-        WindowVisibility Visibility;
-    };
-
-    struct WindowTitleChangeEvent
-    {
-        WindowTitle Title;
     };
 }

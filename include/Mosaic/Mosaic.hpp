@@ -5,7 +5,6 @@
 #include <Mosaic/Application/Resources.hpp>
 
 #include <Mosaic/Debug/Console.hpp>
-#include <Mosaic/Debug/Profiler.hpp>
 
 #include <Mosaic/ECS/ECSManager.hpp>
 #include <Mosaic/ECS/ECSView.hpp>
@@ -17,5 +16,5 @@
 #include <Mosaic/Macros/Main.hpp>
 #include <Mosaic/Macros/PID.hpp>
 
-#include <Mosaic/Window/Resources.hpp>
+#include <Mosaic/Window/Component.hpp>
 #include <Mosaic/Window/Window.hpp>

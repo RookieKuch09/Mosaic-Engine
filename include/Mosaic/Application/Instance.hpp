@@ -9,7 +9,6 @@
 #include <Mosaic/ECS/EventManager.hpp>
 
 #include <Mosaic/Debug/Console.hpp>
-#include <Mosaic/Debug/Profiler.hpp>
 
 #include <Mosaic/Window/Window.hpp>
 

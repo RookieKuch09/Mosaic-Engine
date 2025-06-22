@@ -5,6 +5,7 @@
 #include <Mosaic/Debug/Console.hpp>
 
 #include <Mosaic/ECS/ECSManager.hpp>
+#include <Mosaic/ECS/ECSView.hpp>
 #include <Mosaic/ECS/Entity.hpp>
 
 #include <boost/type_index.hpp>

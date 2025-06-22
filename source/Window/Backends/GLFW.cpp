@@ -1,157 +1,94 @@
 // TODO: add conditional compilation based on CMake macro definitions
 
-#include <Mosaic/Application/Instance.hpp>
-#include <Mosaic/Debug/Console.hpp>
-
-#include <Mosaic/Window/Resources.hpp>
+#include <Mosaic/Window/Backends/GLFW.hpp>
 #include <Mosaic/Window/Window.hpp>
+
+#include <Mosaic/Application/Resources.hpp>
+
+#include <Mosaic/Debug/Console.hpp>
 
 #include <GLFW/glfw3.h>
 
 namespace Mosaic
 {
-    struct Window::Backend::Storage
-    {
-        GLFWwindow* Handle;
-
-        glm::ivec2 WindowedPosition;
-        glm::ivec2 WindowedSize;
-    };
-
-    Window::Backend::Backend(WindowResources& windowResources, InstanceResources& instanceResources)
-        : mWindowResources(windowResources), mInstanceResources(instanceResources)
+    GLFWWindowBackend::GLFWWindowBackend(InstanceResources& instanceResources, glm::uvec2 size, glm::uvec2 position, const std::string& title, WindowVisibility visibility)
+        : WindowBackend(instanceResources, size, position, title, visibility)
     {
         if (glfwInit() != GLFW_TRUE)
         {
             mInstanceResources.Console.Halt(1, "Failed to initialise window backend");
         }
 
-        mStorage = new Storage();
-
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    Window::Backend::~Backend()
+    void GLFWWindowBackend::Create()
     {
-    }
+        mHandle = glfwCreateWindow(mSize.x, mSize.y, mTitle.c_str(), nullptr, nullptr);
 
-    void Window::Backend::Create()
-    {
-        auto& size = mWindowResources.Size;
-        auto& title = mWindowResources.Title;
-
-        mStorage->Handle = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
-
-        if (not mStorage->Handle)
+        if (not mHandle)
         {
             mInstanceResources.Console.Halt(1, "Failed to create window");
         }
     }
 
-    void Window::Backend::Destroy()
+    void GLFWWindowBackend::Update()
     {
-        if (mStorage)
-        {
-            if (mStorage->Handle)
-            {
-                glfwDestroyWindow(mStorage->Handle);
-
-                mStorage->Handle = nullptr;
-            }
-
-            delete mStorage;
-
-            mStorage = nullptr;
-
-            glfwTerminate();
-        }
+        glfwPollEvents();
     }
 
-    void Window::Backend::GetState()
+    void GLFWWindowBackend::Destroy()
     {
-        glm::ivec2 position;
-        glm::ivec2 size;
-
-        glfwGetWindowSize(mStorage->Handle, &size.x, &size.y);
-        glfwGetWindowPos(mStorage->Handle, &position.x, &position.y);
-
-        mWindowResources.Position = position;
-        mWindowResources.Size = size;
-
-        if (glfwWindowShouldClose(mStorage->Handle))
+        if (mHandle)
         {
-            mWindowResources.Visibility = WindowVisibility::Destroy;
+            glfwDestroyWindow(static_cast<GLFWwindow*>(mHandle));
 
-            return;
+            mHandle = nullptr;
         }
 
-        if (glfwGetWindowAttrib(mStorage->Handle, GLFW_ICONIFIED))
-        {
-            mWindowResources.Visibility = WindowVisibility::Minimised;
-            return;
-        }
-
-        if (glfwGetWindowMonitor(mStorage->Handle))
-        {
-            mWindowResources.Visibility = WindowVisibility::Fullscreen;
-
-            return;
-        }
-
-        if (not glfwGetWindowAttrib(mStorage->Handle, GLFW_DECORATED))
-        {
-            mWindowResources.Visibility = WindowVisibility::Borderless;
-        }
-        else
-        {
-            mWindowResources.Visibility = WindowVisibility::Windowed;
-        }
+        glfwTerminate();
     }
 
-    void Window::Backend::SetState()
+    void GLFWWindowBackend::SetSize(glm::uvec2 size)
     {
-        SetSize(mWindowResources.Size);
-        SetPosition(mWindowResources.Position);
-        SetTitle(mWindowResources.Title);
-        SetVisibility(mWindowResources.Visibility);
+        glfwSetWindowSize(static_cast<GLFWwindow*>(mHandle), size.x, size.y);
+
+        mSize = size;
     }
 
-    void Window::Backend::SetSize(WindowSize size)
+    void GLFWWindowBackend::SetPosition(glm::uvec2 position)
     {
-        glfwSetWindowSize(mStorage->Handle, size.x, size.y);
+        glfwSetWindowPos(static_cast<GLFWwindow*>(mHandle), position.x, position.y);
+
+        mPosition = position;
     }
 
-    void Window::Backend::SetPosition(WindowPosition position)
+    void GLFWWindowBackend::SetTitle(const std::string& title)
     {
-        glfwSetWindowPos(mStorage->Handle, position.x, position.y);
+        glfwSetWindowTitle(static_cast<GLFWwindow*>(mHandle), title.c_str());
+
+        mTitle = title;
     }
 
-    void Window::Backend::SetTitle(WindowTitle title)
+    void GLFWWindowBackend::SetVisibility(WindowVisibility visibility)
     {
-        glfwSetWindowTitle(mStorage->Handle, title.c_str());
-    }
-
-    void Window::Backend::SetVisibility(WindowVisibility visibility)
-    {
-        GLFWwindow* handle = mStorage->Handle;
-
         switch (visibility)
         {
             case WindowVisibility::Minimised:
             {
-                glfwIconifyWindow(handle);
+                glfwIconifyWindow(static_cast<GLFWwindow*>(mHandle));
 
                 break;
             }
             case WindowVisibility::Windowed:
             {
-                if (glfwGetWindowMonitor(handle))
+                if (glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
                 {
-                    const auto& size = mStorage->WindowedSize;
-                    const auto& pos = mStorage->WindowedPosition;
+                    const auto& size = mWindowedSize;
+                    const auto& pos = mWindowedPosition;
 
-                    glfwSetWindowMonitor(handle, nullptr, pos.x, pos.y, size.x, size.y, 0);
-                    glfwSetWindowAttrib(handle, GLFW_DECORATED, GLFW_TRUE);
+                    glfwSetWindowMonitor(static_cast<GLFWwindow*>(mHandle), nullptr, pos.x, pos.y, size.x, size.y, 0);
+                    glfwSetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED, GLFW_TRUE);
                 }
 
                 break;
@@ -159,15 +96,15 @@ namespace Mosaic
 
             case WindowVisibility::Fullscreen:
             {
-                if (not glfwGetWindowMonitor(handle))
+                if (not glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
                 {
                     int xpos, ypos, width, height;
 
-                    glfwGetWindowPos(handle, &xpos, &ypos);
-                    glfwGetWindowSize(handle, &width, &height);
+                    glfwGetWindowPos(static_cast<GLFWwindow*>(mHandle), &xpos, &ypos);
+                    glfwGetWindowSize(static_cast<GLFWwindow*>(mHandle), &width, &height);
 
-                    mStorage->WindowedPosition = {xpos, ypos};
-                    mStorage->WindowedSize = {width, height};
+                    mWindowedPosition = {xpos, ypos};
+                    mWindowedSize = {width, height};
                 }
 
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -175,7 +112,7 @@ namespace Mosaic
 
                 if (monitor and mode)
                 {
-                    glfwSetWindowMonitor(handle, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+                    glfwSetWindowMonitor(static_cast<GLFWwindow*>(mHandle), monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
                 }
 
                 break;
@@ -183,15 +120,15 @@ namespace Mosaic
 
             case WindowVisibility::Borderless:
             {
-                if (not glfwGetWindowMonitor(handle))
+                if (not glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
                 {
                     int xpos, ypos, width, height;
 
-                    glfwGetWindowPos(handle, &xpos, &ypos);
-                    glfwGetWindowSize(handle, &width, &height);
+                    glfwGetWindowPos(static_cast<GLFWwindow*>(mHandle), &xpos, &ypos);
+                    glfwGetWindowSize(static_cast<GLFWwindow*>(mHandle), &width, &height);
 
-                    mStorage->WindowedPosition = {xpos, ypos};
-                    mStorage->WindowedSize = {width, height};
+                    mWindowedPosition = {xpos, ypos};
+                    mWindowedSize = {width, height};
                 }
 
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
@@ -199,8 +136,8 @@ namespace Mosaic
 
                 if (monitor and mode)
                 {
-                    glfwSetWindowMonitor(handle, nullptr, 0, 0, mode->width, mode->height, mode->refreshRate);
-                    glfwSetWindowAttrib(handle, GLFW_DECORATED, GLFW_FALSE);
+                    glfwSetWindowMonitor(static_cast<GLFWwindow*>(mHandle), nullptr, 0, 0, mode->width, mode->height, mode->refreshRate);
+                    glfwSetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED, GLFW_FALSE);
                 }
 
                 break;
@@ -208,15 +145,63 @@ namespace Mosaic
 
             case WindowVisibility::Destroy:
             {
-                glfwSetWindowShouldClose(handle, GLFW_TRUE);
+                glfwSetWindowShouldClose(static_cast<GLFWwindow*>(mHandle), GLFW_TRUE);
 
                 break;
             }
         }
     }
 
-    void Window::Backend::Update()
+    glm::uvec2 GLFWWindowBackend::GetSize()
     {
-        glfwPollEvents();
+        glm::ivec2 size;
+
+        glfwGetWindowSize(static_cast<GLFWwindow*>(mHandle), &size.x, &size.y);
+
+        mSize = size;
+
+        return mSize;
+    }
+
+    glm::uvec2 GLFWWindowBackend::GetPosition()
+    {
+        glm::ivec2 position;
+
+        glfwGetWindowPos(static_cast<GLFWwindow*>(mHandle), &position.x, &position.y);
+
+        mPosition = position;
+
+        return mPosition;
+    }
+
+    std::string GLFWWindowBackend::GetTitle()
+    {
+        return mTitle;
+    }
+
+    WindowVisibility GLFWWindowBackend::GetVisibility()
+    {
+        if (glfwWindowShouldClose(static_cast<GLFWwindow*>(mHandle)))
+        {
+            mVisibility = WindowVisibility::Destroy;
+        }
+        else if (glfwGetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_ICONIFIED))
+        {
+            mVisibility = WindowVisibility::Minimised;
+        }
+        else if (glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
+        {
+            mVisibility = WindowVisibility::Fullscreen;
+        }
+        else if (not glfwGetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED))
+        {
+            mVisibility = WindowVisibility::Borderless;
+        }
+        else
+        {
+            mVisibility = WindowVisibility::Windowed;
+        }
+
+        return mVisibility;
     }
 }

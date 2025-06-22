@@ -1,4 +1,7 @@
+#include <Mosaic/Window/Component.hpp>
 #include <Mosaic/Window/Window.hpp>
+
+#include <Mosaic/Window/Backends/GLFW.hpp>
 
 #include <Mosaic/Application/Application.hpp>
 #include <Mosaic/Application/Instance.hpp>
@@ -7,79 +10,107 @@
 
 namespace Mosaic
 {
-    WindowResources& Window::GetResources()
-    {
-        return mWindowResources;
-    }
-
-    const WindowResources& Window::GetResources() const
-    {
-        return mWindowResources;
-    }
-
     Window::Window(InstanceResources& resources)
-        : mBackend(mWindowResources, resources), mInstanceResources(resources)
+        : mInstanceResources(resources)
     {
-        mBackend.Create();
+        // TODO: allow for custom initial values for the window backend
+        // TODO: switch backends based on macros or parameters
+        mBackend = new GLFWWindowBackend(mInstanceResources, {800, 600}, {0, 0}, "Mosaic Window", WindowVisibility::Windowed);
+
+        mBackend->Create();
+
+        mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowSizeChangeRequest);
+        mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowPositionChangeRequest);
+        mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowTitleChangeRequest);
+        mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowVisibilityChangeRequest);
     }
 
     Window::~Window()
     {
-        mBackend.Destroy();
-    }
-
-    void Window::Setup()
-    {
-        mWindowResourcesCopy = mWindowResources;
-
-        mBackend.SetState();
+        mBackend->Destroy();
     }
 
     void Window::Update()
     {
-        mBackend.Update();
+        mBackend->Update();
 
-        mBackend.GetState();
+        auto size = mBackend->GetSize();
+        auto position = mBackend->GetPosition();
+        auto title = mBackend->GetTitle();
+        auto visibility = mBackend->GetVisibility();
 
-        if (mWindowResources.Size != mWindowResourcesCopy.Size)
+        if (mSize != size)
         {
-            mWindowResourcesCopy.Size = mWindowResources.Size;
+            mSize = size;
 
-            mBackend.SetSize(mWindowResources.Size);
-
-            mInstanceResources.EventManager.Emit<WindowSizeChangeEvent>(mWindowResources.Size);
+            mInstanceResources.EventManager.Emit<WindowSizeChangeEvent>(mSize);
         }
 
-        if (mWindowResources.Position != mWindowResourcesCopy.Position)
+        if (mPosition != position)
         {
-            mWindowResourcesCopy.Position = mWindowResources.Position;
+            mPosition = position;
 
-            mBackend.SetPosition(mWindowResources.Position);
-
-            mInstanceResources.EventManager.Emit<WindowPositionChangeEvent>(mWindowResources.Position);
+            mInstanceResources.EventManager.Emit<WindowPositionChangeEvent>(mPosition);
         }
 
-        if (mWindowResources.Title != mWindowResourcesCopy.Title)
+        if (mTitle != title)
         {
-            mWindowResourcesCopy.Title = mWindowResources.Title;
+            mTitle = title;
 
-            mBackend.SetTitle(mWindowResources.Title);
-
-            mInstanceResources.EventManager.Emit<WindowTitleChangeEvent>(mWindowResources.Title);
+            mInstanceResources.EventManager.Emit<WindowTitleChangeEvent>(mTitle);
         }
 
-        if (mWindowResources.Visibility != mWindowResourcesCopy.Visibility)
+        if (mVisibility != visibility)
         {
-            mWindowResourcesCopy.Visibility = mWindowResources.Visibility;
+            mVisibility = visibility;
 
-            mBackend.SetVisibility(mWindowResources.Visibility);
-
-            mInstanceResources.EventManager.Emit<WindowVisibilityChangeEvent>(mWindowResources.Visibility);
+            mInstanceResources.EventManager.Emit<WindowVisibilityChangeEvent>(mVisibility);
         }
 
-        if (mWindowResources.Visibility == WindowVisibility::Destroy)
+        if (mVisibility == WindowVisibility::Destroy)
         {
             mInstanceResources.EventManager.Emit<ApplicationExitEvent>(0);
         }
+    }
+
+    void Window::UpdateComponents()
+    {
+        auto view = mInstanceResources.ECSManager.QueryView<WindowStateComponent>();
+
+        for (auto [entity, component] : view)
+        {
+            component.Position = mPosition;
+            component.Size = mSize;
+            component.Title = mTitle;
+            component.Visibility = mVisibility;
+        }
+    }
+
+    void Window::OnWindowSizeChangeRequest(InstanceResources&, const WindowSizeChangeRequest& request)
+    {
+        mSize = request.SizeRequest;
+
+        mBackend->SetSize(mSize);
+    }
+
+    void Window::OnWindowPositionChangeRequest(InstanceResources&, const WindowPositionChangeRequest& request)
+    {
+        mPosition = request.PositionRequest;
+
+        mBackend->SetPosition(mPosition);
+    }
+
+    void Window::OnWindowTitleChangeRequest(InstanceResources&, const WindowTitleChangeRequest& request)
+    {
+        mTitle = request.TitleRequest;
+
+        mBackend->SetTitle(mTitle);
+    }
+
+    void Window::OnWindowVisibilityChangeRequest(InstanceResources&, const WindowVisibilityChangeRequest& request)
+    {
+        mVisibility = request.VisibilityRequest;
+
+        mBackend->SetVisibility(mVisibility);
     }
 }
