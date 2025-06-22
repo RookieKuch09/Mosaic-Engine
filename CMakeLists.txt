@@ -15,10 +15,12 @@ file(GLOB_RECURSE MOSAIC_SOURCES "source/*.cpp")
 file(GLOB_RECURSE MOSAIC_HEADERS "include/Mosaic/*.hpp" "include/Mosaic/*.inl")
 
 find_package(glfw3 REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
 
 add_library(Mosaic ${MOSAIC_SOURCES} ${MOSAIC_HEADERS})
 
-target_link_libraries(Mosaic PUBLIC glfw)
+target_link_libraries(Mosaic PUBLIC glfw GLEW::GLEW OpenGL::GL)
 
 target_compile_options(Mosaic PRIVATE -Wall -Wextra -Wpedantic -Werror)
 

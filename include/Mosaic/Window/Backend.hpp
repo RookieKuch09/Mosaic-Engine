@@ -21,6 +21,11 @@ namespace Mosaic
         WindowBackend& operator=(const WindowBackend& other) = delete;
         WindowBackend& operator=(WindowBackend&& other) noexcept = delete;
 
+        virtual void GL_CreateContext(glm::uvec2 version) = 0;
+        virtual void GL_ActivateContext() = 0;
+        virtual void GL_SetSwapInterval(std::uint32_t interval) = 0;
+        virtual void GL_SwapBuffers() = 0;
+
     protected:
         WindowBackend(InstanceResources& instanceResources, glm::uvec2 size, glm::uvec2 position, const std::string& title, WindowVisibility visibility);
         virtual ~WindowBackend() = default;

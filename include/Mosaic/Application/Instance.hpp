@@ -12,6 +12,8 @@
 
 #include <Mosaic/Window/Window.hpp>
 
+#include <Mosaic/Renderer/Renderer.hpp>
+
 namespace Mosaic
 {
     template <typename T> requires std::is_base_of_v<Application, T>
@@ -34,7 +36,7 @@ namespace Mosaic
     private:
         void OnApplicationExit(InstanceResources&, const ApplicationExitEvent& event);
 
-        T mInstance;
+        T mApplication;
 
         InstanceResources mInstanceResources;
 
@@ -43,6 +45,7 @@ namespace Mosaic
 
         Console mConsole;
         Window mWindow;
+        Renderer mRenderer;
 
         bool mRunning;
 

@@ -10,6 +10,7 @@ namespace Mosaic
 
     class Console;
     class Window;
+    class Renderer;
 
     class ECSManager;
     class EventManager;
@@ -25,12 +26,13 @@ namespace Mosaic
 
         Console& Console;
         Window& Window;
+        Renderer& Renderer;
 
         ECSManager& ECSManager;
         EventManager& EventManager;
 
     private:
-        InstanceResources(class Console& console, class Window& window, class ECSManager& ecsManager, class EventManager& eventManager);
+        InstanceResources(class Console& console, class Window& window, class Renderer& renderer, class ECSManager& ecsManager, class EventManager& eventManager);
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;

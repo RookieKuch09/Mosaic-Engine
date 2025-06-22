@@ -11,13 +11,11 @@
 namespace Mosaic
 {
     Window::Window(InstanceResources& resources)
-        : mInstanceResources(resources)
+        : mBackend(nullptr), mInstanceResources(resources)
     {
         // TODO: allow for custom initial values for the window backend
         // TODO: switch backends based on macros or parameters
         mBackend = new GLFWWindowBackend(mInstanceResources, {800, 600}, {0, 0}, "Mosaic Window", WindowVisibility::Windowed);
-
-        mBackend->Create();
 
         mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowSizeChangeRequest);
         mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowPositionChangeRequest);
@@ -27,7 +25,13 @@ namespace Mosaic
 
     Window::~Window()
     {
-        mBackend->Destroy();
+        delete mBackend;
+        mBackend = nullptr;
+    }
+
+    void Window::Create()
+    {
+        mBackend->Create();
     }
 
     void Window::Update()
@@ -71,10 +75,7 @@ namespace Mosaic
         {
             mInstanceResources.EventManager.Emit<ApplicationExitEvent>(0);
         }
-    }
 
-    void Window::UpdateComponents()
-    {
         auto view = mInstanceResources.ECSManager.QueryView<WindowStateComponent>();
 
         for (auto [entity, component] : view)
@@ -84,6 +85,11 @@ namespace Mosaic
             component.Title = mTitle;
             component.Visibility = mVisibility;
         }
+    }
+
+    void Window::Destroy()
+    {
+        mBackend->Destroy();
     }
 
     void Window::OnWindowSizeChangeRequest(InstanceResources&, const WindowSizeChangeRequest& request)

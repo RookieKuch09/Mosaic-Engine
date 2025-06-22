@@ -15,7 +15,12 @@ namespace Mosaic
         GLFWWindowBackend& operator=(const GLFWWindowBackend& other) = delete;
         GLFWWindowBackend& operator=(GLFWWindowBackend&& other) noexcept = delete;
 
-    protected:
+        void GL_CreateContext(glm::uvec2 version) override;
+        void GL_ActivateContext() override;
+        void GL_SetSwapInterval(std::uint32_t interval) override;
+        void GL_SwapBuffers() override;
+
+    private:
         GLFWWindowBackend(InstanceResources& instanceResources, glm::uvec2 size, glm::uvec2 position, const std::string& title, WindowVisibility visibility);
         ~GLFWWindowBackend() override = default;
 

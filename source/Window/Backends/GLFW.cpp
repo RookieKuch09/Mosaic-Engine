@@ -11,6 +11,30 @@
 
 namespace Mosaic
 {
+    void GLFWWindowBackend::GL_CreateContext(glm::uvec2 version)
+    {
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, version.x);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, version.y);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    }
+
+    void GLFWWindowBackend::GL_ActivateContext()
+    {
+        glfwMakeContextCurrent(static_cast<GLFWwindow*>(mHandle));
+    }
+
+    void GLFWWindowBackend::GL_SetSwapInterval(std::uint32_t interval)
+    {
+        glfwSwapInterval(interval);
+    }
+
+    void GLFWWindowBackend::GL_SwapBuffers()
+    {
+        glfwSwapBuffers(static_cast<GLFWwindow*>(mHandle));
+    }
+
     GLFWWindowBackend::GLFWWindowBackend(InstanceResources& instanceResources, glm::uvec2 size, glm::uvec2 position, const std::string& title, WindowVisibility visibility)
         : WindowBackend(instanceResources, size, position, title, visibility)
     {

@@ -37,9 +37,9 @@ namespace Mosaic
         Window(InstanceResources& resources);
         ~Window();
 
+        void Create();
         void Update();
-
-        void UpdateComponents();
+        void Destroy();
 
         void OnWindowSizeChangeRequest(InstanceResources&, const WindowSizeChangeRequest& request);
         void OnWindowPositionChangeRequest(InstanceResources&, const WindowPositionChangeRequest& request);
@@ -59,5 +59,7 @@ namespace Mosaic
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
+
+        friend class OpenGLRendererBackend;
     };
 }
