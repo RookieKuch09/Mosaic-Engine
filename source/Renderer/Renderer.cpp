@@ -41,6 +41,14 @@ namespace Mosaic
     void Renderer::Update()
     {
         mBackend->Update();
+
+        auto view = mInstanceResources.ECSManager.QueryView<RendererStateComponent>();
+
+        for (auto [entity, component] : view)
+        {
+            component.ClearColour = mClearColour;
+            component.VSyncMode = mVSyncMode;
+        }
     }
 
     void Renderer::Destroy()

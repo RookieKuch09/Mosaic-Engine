@@ -18,3 +18,6 @@
 
 #include <Mosaic/Window/Component.hpp>
 #include <Mosaic/Window/Window.hpp>
+
+#include <Mosaic/Renderer/Component.hpp>
+#include <Mosaic/Renderer/Renderer.hpp>

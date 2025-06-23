@@ -23,18 +23,13 @@ namespace Mosaic
         Application& operator=(const Application& other) = delete;
         Application& operator=(Application&& other) noexcept = default;
 
-        virtual ~Application() = default;
-
-        virtual void Setup() = 0;
+        virtual void Setup(InstanceResources& instanceResources) = 0;
 
     protected:
-        Application(InstanceResources& resources);
-
-        InstanceResources& GetInstanceResources();
+        Application() = default;
+        virtual ~Application() = default;
 
     private:
-        InstanceResources* mInstanceResources;
-
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
     };

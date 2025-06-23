@@ -6,14 +6,14 @@ namespace Mosaic
 {
     template <typename T> requires std::is_base_of_v<Application, T>
     Instance<T>::Instance()
-        : mApplication(mInstanceResources), mInstanceResources(mConsole, mWindow, mRenderer, mECSManager, mEventManager), mECSManager(mInstanceResources), mEventManager(mInstanceResources), mRunning(true), mWindow(mInstanceResources), mRenderer(mInstanceResources)
+        : mApplication(), mInstanceResources(mConsole, mWindow, mRenderer, mECSManager, mEventManager), mECSManager(mInstanceResources), mEventManager(mInstanceResources), mRunning(true), mWindow(mInstanceResources), mRenderer(mInstanceResources)
     {
     }
 
     template <typename T> requires std::is_base_of_v<Application, T>
     void Instance<T>::Setup()
     {
-        mApplication.Setup();
+        mApplication.Setup(mInstanceResources);
 
         mEventManager.AddResponder(this, &Instance::OnApplicationExit);
     }
