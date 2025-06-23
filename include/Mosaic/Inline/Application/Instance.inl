@@ -21,24 +21,31 @@ namespace Mosaic
     template <typename T> requires std::is_base_of_v<Application, T>
     std::int32_t Instance<T>::Run()
     {
-        mRenderer.Setup();
-
-        mWindow.Create();
-        mRenderer.Create();
-
-        while (mRunning)
+        try
         {
-            mWindow.Update();
-            mRenderer.Update();
+            mRenderer.Setup();
 
-            mECSManager.Update();
-            mEventManager.Update();
+            mWindow.Create();
+            mRenderer.Create();
+
+            while (mRunning)
+            {
+                mWindow.Update();
+                mRenderer.Update();
+
+                mECSManager.Update();
+                mEventManager.Update();
+            }
+
+            mRenderer.Destroy();
+            mWindow.Destroy();
+
+            return mExitCode;
         }
-
-        mRenderer.Destroy();
-        mWindow.Destroy();
-
-        return mExitCode;
+        catch (const EarlyExit& earlyExit)
+        {
+            return earlyExit.ExitCode;
+        }
     }
 
     template <typename T> requires std::is_base_of_v<Application, T>

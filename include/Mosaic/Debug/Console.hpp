@@ -15,6 +15,11 @@ namespace Mosaic
     template <typename T> requires std::is_base_of_v<Application, T>
     class Instance;
 
+    struct EarlyExit
+    {
+        std::uint32_t ExitCode;
+    };
+
     class MOSAIC_PUBLIC_EXPOSURE Console
     {
     public:

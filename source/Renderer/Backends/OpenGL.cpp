@@ -23,6 +23,7 @@ namespace Mosaic
         auto& window = mInstanceResources.Window.mBackend;
 
         // TODO: allow for user to select OpenGL version
+        // TODO: ensure version is supported by system
         window->GL_CreateContext({3, 3});
     }
 
