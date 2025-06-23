@@ -109,19 +109,19 @@ namespace Mosaic
         {
             case LogSeverity::Success:
             {
-                return "[SUCCESS] --";
+                return " [SUCCESS] --> ";
             }
             case LogSeverity::Notice:
             {
-                return "[NOTICE] ---";
+                return " [NOTICE] ---> ";
             }
             case LogSeverity::Warning:
             {
-                return "[WARNING] --";
+                return " [WARNING] --> ";
             }
             case LogSeverity::Error:
             {
-                return "[ERROR] ----";
+                return " [ERROR] ----> ";
             }
         }
 
@@ -157,7 +157,7 @@ namespace Mosaic
     template <Console::LogSeverity Severity>
     std::string Console::GetFullPrefixForFileOutput()
     {
-        return GetTimestampForFileOutput() + GetSeverityPrefixForFileOutput<Severity>() + ANSI_RESET;
+        return GetTimestampForFileOutput() + GetSeverityPrefixForFileOutput<Severity>();
     }
 
     template <Console::LogSeverity Severity>
