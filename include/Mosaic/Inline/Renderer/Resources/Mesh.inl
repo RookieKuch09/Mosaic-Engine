@@ -23,33 +23,6 @@ namespace Mosaic
     }
 
     template <typename... A>
-    MeshDescriptorInfo<MeshDescriptor<A...>::AttributeCount> MeshDescriptor<A...>::GetDescriptorInfo()
-    {
-        using Tuple = std::tuple<A...>;
-
-        static constexpr auto makeInfoTable = []<std::size_t... I>(std::index_sequence<I...>)
-        {
-            return std::array<MeshAttributeInfo, AttributeCount>{
-                MeshAttributeInfo{
-                    .Index = I,
-                    .Offset = Offsets[I],
-                    .Count = std::tuple_element_t<I, Tuple>::ElementCount,
-                    .TypeSize = sizeof(typename std::tuple_element_t<I, Tuple>::Type),
-                    .TotalSize = sizeof(typename std::tuple_element_t<I, Tuple>::Type) * std::tuple_element_t<I, Tuple>::ElementCount,
-                    .SemanticName = std::string(magic_enum::enum_name(std::tuple_element_t<I, Tuple>::Semantic)),
-                    .TypeName = boost::typeindex::type_id<typename std::tuple_element_t<I, Tuple>::Type>().pretty_name()}...};
-        };
-
-        static const auto infoTable = makeInfoTable(std::make_index_sequence<AttributeCount>{});
-
-        return MeshDescriptorInfo<AttributeCount>{
-            .Attributes = infoTable,
-            .Stride = Stride,
-            .AttributeCount = AttributeCount,
-        };
-    }
-
-    template <typename... A>
     template <auto S>
     consteval std::size_t MeshDescriptor<A...>::GetOffset()
     {

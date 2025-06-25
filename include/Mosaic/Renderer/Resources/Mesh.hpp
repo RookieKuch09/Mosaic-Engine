@@ -1,43 +1,61 @@
 #pragma once
 
 #include <array>
-#include <string>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
-#include <boost/type_index.hpp>
-
-#include <magic_enum/magic_enum.hpp>
+#include <glm/glm.hpp>
 
 namespace Mosaic
 {
-    struct MeshAttributeInfo
+    template <typename T>
+    struct MeshAttributeTypeInfo;
+
+    template <typename T> requires std::is_arithmetic_v<T>
+    struct MeshAttributeTypeInfo<T>
     {
-        const std::size_t Index;
-        const std::size_t Offset;
-        const std::size_t Count;
-        const std::size_t TypeSize;
-        const std::size_t TotalSize;
-        const std::string SemanticName;
-        const std::string TypeName;
+        using Type = T;
+
+        static constexpr std::size_t Size = sizeof(T);
+        static constexpr std::size_t Count = 1;
     };
 
-    template <std::size_t N>
-    struct MeshDescriptorInfo
+    template <typename T> requires std::is_arithmetic_v<T>
+    struct MeshAttributeTypeInfo<glm::vec<2, T>>
     {
-        const std::array<MeshAttributeInfo, N> Attributes;
+        using Type = T;
 
-        const std::size_t Stride;
-        const std::size_t AttributeCount;
+        static constexpr std::size_t Size = sizeof(T);
+        static constexpr std::size_t Count = 2;
     };
 
-    template <auto S, typename T, std::size_t N>
+    template <typename T> requires std::is_arithmetic_v<T>
+    struct MeshAttributeTypeInfo<glm::vec<3, T>>
+    {
+        using Type = T;
+
+        static constexpr std::size_t Size = sizeof(T);
+        static constexpr std::size_t Count = 3;
+    };
+
+    template <typename T> requires std::is_arithmetic_v<T>
+    struct MeshAttributeTypeInfo<glm::vec<4, T>>
+    {
+        using Type = T;
+
+        static constexpr std::size_t Size = sizeof(T);
+        static constexpr std::size_t Count = 4;
+    };
+
+    template <auto S, typename T, std::size_t N = 1>
     struct MeshAttribute
     {
-        static constexpr auto Semantic = S;
-        static constexpr std::size_t ElementCount = N;
+        using SemanticType = decltype(S);
+        using TypeInfo = MeshAttributeTypeInfo<T>;
 
-        using Type = T;
+        static constexpr auto Semantic = S;
+        static constexpr std::size_t Count = N;
     };
 
     template <typename... A>
@@ -45,9 +63,7 @@ namespace Mosaic
     {
     public:
         static constexpr std::size_t AttributeCount = sizeof...(A);
-        static constexpr std::size_t Stride = ((sizeof(typename A::Type) * A::ElementCount) + ...);
-
-        static MeshDescriptorInfo<AttributeCount> GetDescriptorInfo();
+        static constexpr std::size_t Stride = ((A::TypeInfo::Size * A::TypeInfo::Count * A::Count) + ...);
 
         template <auto S>
         consteval static std::size_t GetOffset();
@@ -56,7 +72,7 @@ namespace Mosaic
         consteval static std::size_t GetIndex();
 
         template <auto S>
-        using GetAttribute = std::tuple_element_t<MeshDescriptor::template GetIndex<S>(), std::tuple<A...>>;
+        using Attribute = std::tuple_element_t<MeshDescriptor::template GetIndex<S>(), std::tuple<A...>>;
 
     private:
         template <auto S, std::size_t I = 0>
@@ -65,9 +81,12 @@ namespace Mosaic
         static constexpr std::array<std::size_t, AttributeCount> Offsets = []
         {
             std::array<std::size_t, AttributeCount> arr{};
+
             std::size_t offset = 0;
             std::size_t i = 0;
-            ((arr[i++] = std::exchange(offset, offset + sizeof(typename A::Type) * A::ElementCount)), ...);
+
+            ((arr[i++] = std::exchange(offset, offset + (A::TypeInfo::Size * A::TypeInfo::Count * A::Count))), ...);
+
             return arr;
         }();
     };
