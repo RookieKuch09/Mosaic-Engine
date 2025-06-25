@@ -17,7 +17,8 @@ namespace Mosaic
 
     struct EarlyExit
     {
-        std::uint32_t ExitCode;
+        std::uint32_t ExitCode = 0;
+        std::string ExitMessage = "Runtime Exception";
     };
 
     class MOSAIC_PUBLIC_EXPOSURE Console

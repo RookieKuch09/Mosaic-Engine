@@ -42,7 +42,7 @@ namespace Mosaic
 
         DispatchToTerminal(haltMessage);
 
-        throw EarlyExit(1);
+        throw EarlyExit(1, "Console::Halt");
     }
 
     template <typename... Args>
@@ -65,7 +65,7 @@ namespace Mosaic
             DispatchToTerminal(haltMessage);
         }
 
-        throw EarlyExit(1);
+        throw EarlyExit(1, "Console::Halt");
     }
 
     template <typename... Args>
@@ -76,7 +76,7 @@ namespace Mosaic
 
         DispatchToTerminal(haltMessage);
 
-        throw EarlyExit(exitCode);
+        throw EarlyExit(exitCode, "Console::Halt");
     }
 
     template <typename... Args>
@@ -99,7 +99,7 @@ namespace Mosaic
             DispatchToTerminal(haltMessage);
         }
 
-        throw EarlyExit(exitCode);
+        throw EarlyExit(exitCode, "Console::Halt");
     }
 
     template <Console::LogSeverity Severity>

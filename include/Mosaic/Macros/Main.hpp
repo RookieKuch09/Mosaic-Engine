@@ -10,8 +10,6 @@
     {                                               \
         Mosaic::Instance<ApplicationType> instance; \
                                                     \
-        instance.Setup();                           \
-                                                    \
         return instance.Run();                      \
     }
 

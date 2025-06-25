@@ -10,7 +10,7 @@ namespace Mosaic
     {
         if constexpr (I >= AttributeCount)
         {
-            static_assert(I < AttributeCount, "Semantic not found in MeshDescriptor");
+            static_assert(I < AttributeCount, "MeshDescriptor::GetIndex: Semantic not found in descriptor");
         }
         else if constexpr (std::tuple_element_t<I, std::tuple<A...>>::Semantic == S)
         {

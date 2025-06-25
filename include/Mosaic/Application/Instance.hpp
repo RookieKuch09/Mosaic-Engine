@@ -29,8 +29,6 @@ namespace Mosaic
         Instance();
         ~Instance() = default;
 
-        void Setup();
-
         std::int32_t Run();
 
     private:

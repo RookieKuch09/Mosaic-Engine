@@ -11,18 +11,14 @@ namespace Mosaic
     }
 
     template <typename T> requires std::is_base_of_v<Application, T>
-    void Instance<T>::Setup()
-    {
-        mApplication.Setup(mInstanceResources);
-
-        mEventManager.AddResponder(this, &Instance::OnApplicationExit);
-    }
-
-    template <typename T> requires std::is_base_of_v<Application, T>
     std::int32_t Instance<T>::Run()
     {
         try
         {
+            mApplication.Setup(mInstanceResources);
+
+            mEventManager.AddResponder(this, &Instance::OnApplicationExit);
+
             mRenderer.Setup();
 
             mWindow.Create();
@@ -44,6 +40,8 @@ namespace Mosaic
         }
         catch (const EarlyExit& earlyExit)
         {
+            mConsole.Log<Console::LogSeverity::Notice>("Early application exit: {} (exit code: {})", earlyExit.ExitMessage, earlyExit.ExitCode);
+
             return earlyExit.ExitCode;
         }
     }
