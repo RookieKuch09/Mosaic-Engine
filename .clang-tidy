@@ -12,4 +12,4 @@ HeaderFilterRegex: '.*'
 FormatStyle: file
 
 Checks: >
-  -cppcoreguidelines-avoid-const-or-ref-data-members
+  -cppcoreguidelines-avoid-const-||-ref-data-members

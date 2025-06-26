@@ -9,7 +9,7 @@ namespace Mosaic
     {
         if (EntityIndex.contains(entity.ID))
         {
-            console.Log<Console::LogSeverity::Warning>("Entity {} already exists and cannot be recreated", entity.ID);
+            console.Log<LogSeverity::Warning>("Entity {} already exists && cannot be recreated", entity.ID);
 
             return;
         }
@@ -24,7 +24,7 @@ namespace Mosaic
     {
         if (not EntityIndex.contains(entity.ID))
         {
-            console.Log<Console::LogSeverity::Warning>("Entity {} does not exist and cannot be deleted", entity.ID);
+            console.Log<LogSeverity::Warning>("Entity {} does not exist && cannot be deleted", entity.ID);
 
             return;
         }

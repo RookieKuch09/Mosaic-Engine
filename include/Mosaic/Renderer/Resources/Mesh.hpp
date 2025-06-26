@@ -2,6 +2,8 @@
 
 #include <Mosaic/Debug/Console.hpp>
 
+#include <Mosaic/Utilities/Enumerator.hpp>
+
 #include <array>
 #include <cstring>
 #include <tuple>
@@ -9,10 +11,7 @@
 #include <utility>
 #include <vector>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 namespace Mosaic
 {
@@ -58,11 +57,11 @@ namespace Mosaic
     template <auto S, typename T, std::size_t N = 1>
     struct MeshAttribute
     {
-        using SemanticType = decltype(S);
+        using Semantic = Enumerator<S>;
+
         using ValueType = T;
         using TypeInfo = MeshAttributeTypeInfo<T>;
 
-        static constexpr auto Semantic = S;
         static constexpr std::size_t Count = N;
     };
 
@@ -99,98 +98,107 @@ namespace Mosaic
         }();
     };
 
-    template <typename D, typename IT> requires std::is_integral_v<typename MeshAttributeTypeInfo<IT>::Type>
+    template <auto S, typename T, std::size_t N>
+    struct FixedAttributeData
+    {
+        using Semantic = Enumerator<S>;
+        using Type = T;
+
+        static constexpr std::size_t Size = N;
+        static constexpr std::size_t Count = N * MeshAttributeTypeInfo<T>::Count;
+
+        std::array<T, N> Data;
+    };
+
+    template <typename... Ts>
+    struct ExtractAttributeSemantics
+    {
+        using List = std::tuple<typename Ts::Semantic...>;
+    };
+
+    template <typename Descriptor>
+    struct ExtractDescriptorSemantics;
+
+    template <typename... A>
+    struct ExtractDescriptorSemantics<Mosaic::MeshDescriptor<A...>>
+    {
+        using List = std::tuple<typename A::Semantic...>;
+    };
+
+    template <typename Expected, typename Actual>
+    struct TuplesMatch
+    {
+        static constexpr bool Value = false;
+    };
+
+    template <typename... Expected, typename... Actual>
+    struct TuplesMatch<std::tuple<Expected...>, std::tuple<Actual...>>
+    {
+        static constexpr bool Value = (std::is_same_v<Expected, Actual> && ...);
+    };
+
+    template <typename Descriptor, typename Attr>
+    struct GetAttributeVertexCount;
+
+    template <typename D, auto S, typename T, std::size_t N>
+    struct GetAttributeVertexCount<D, FixedAttributeData<S, T, N>>
+    {
+    private:
+        static constexpr std::size_t descriptorCount = D::template Attribute<S>::Count;
+        static constexpr bool valid = (N % descriptorCount == 0);
+
+    public:
+        static_assert(valid, "Attribute data size must be divisible by the number of components per vertex.");
+        static constexpr std::size_t Count = N / descriptorCount;
+    };
+
+    template <typename Descriptor, std::size_t Expected, typename... Attrs>
+    struct AllVertexCountsMatch;
+
+    template <typename Descriptor, std::size_t Expected>
+    struct AllVertexCountsMatch<Descriptor, Expected>
+    {
+        static constexpr bool Value = true;
+    };
+
+    template <typename Descriptor, std::size_t Expected, typename First, typename... Rest>
+    struct AllVertexCountsMatch<Descriptor, Expected, First, Rest...>
+    {
+        static constexpr std::size_t Count = GetAttributeVertexCount<Descriptor, First>::Count;
+        static constexpr bool Value = (Count == Expected) &&
+                                      AllVertexCountsMatch<Descriptor, Expected, Rest...>::Value;
+    };
+
+    template <typename D>
     class Mesh
     {
     public:
         using Descriptor = D;
-        using IndexType = IT;
 
-        Mesh()
-            : mVertexCount(0)
+        Mesh() : mVertexCount(0)
         {
         }
 
-        template <auto S, typename T>
-        void SetAttributeData(const std::vector<T>& data)
-        {
-            using Attribute = typename Descriptor::template Attribute<S>;
-            using ElementType = typename Attribute::TypeInfo::Type;
-
-            static_assert(std::is_same_v<T, glm::vec<Attribute::TypeInfo::Count, ElementType>>, "Mesh::SetAttributeData: vector element type does not match attribute format");
-
-            if (data.size() % Attribute::Count != 0)
-            {
-                throw EarlyExit(1, std::format("Mesh::SetAttributeData: attribute '{}' expects {} elements per vertex, but received {} elements", static_cast<int>(S), Attribute::Count, data.size()));
-            }
-
-            const std::size_t numVertices = data.size() / Attribute::Count;
-
-            if (mVertexCount == 0)
-            {
-                mVertexCount = numVertices;
-                mData.resize(mVertexCount * Descriptor::Stride);
-            }
-            else if (mVertexCount != numVertices)
-            {
-                throw EarlyExit(1, std::format("Mesh::SetAttributeData: mismatched vertex count. Expected {}, got {}", mVertexCount, numVertices));
-            }
-
-            const std::size_t stride = Descriptor::Stride;
-            const std::size_t offset = Descriptor::template GetOffset<S>();
-
-            for (std::size_t i = 0; i < mVertexCount; ++i)
-            {
-                const T& value = data[i];
-
-                std::memcpy(mData.data() + (i * stride + offset), &value, sizeof(T));
-            }
-        }
-
-        void SetIndexData(const std::vector<IT>& data)
-        {
-            using IndexTypeInfo = MeshAttributeTypeInfo<IT>;
-
-            const std::size_t elementCount = IndexTypeInfo::Count * data.size();
-
-            if (elementCount % 3 != 0)
-            {
-                throw EarlyExit(1, "Mesh::SetIndexData: element count of index data must be a multiple of 3");
-            }
-
-            for (const IT& idx : data)
-            {
-                if constexpr (std::is_integral_v<IT>)
-                {
-                    if (idx >= mVertexCount)
-                    {
-                        throw EarlyExit(1, std::format("Mesh::SetIndexData: index {} out of bounds for vertex count {}", idx, mVertexCount));
-                    }
-                }
-                else if constexpr (glm::vec<3, typename MeshAttributeTypeInfo<IT>::Type>::length() == 3 and std::is_integral_v<typename MeshAttributeTypeInfo<IT>::Type>)
-                {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        if (idx[i] >= mVertexCount)
-                        {
-                            throw EarlyExit(1, std::format("Mesh::SetIndexData: index {} (element {}) out of bounds for vertex count {}", glm::to_string(idx), idx[i], mVertexCount));
-                        }
-                    }
-                }
-                else
-                {
-                    static_assert("Mesh::SetIndexData: unsupported index type");
-                }
-            }
-
-            mIndices.clear();
-
-            mIndices = std::move(data);
-        }
+        template <typename... Attributes>
+        requires(
+            TuplesMatch<typename ExtractDescriptorSemantics<D>::List, typename ExtractAttributeSemantics<std::decay_t<Attributes>...>::List>::Value &&
+            AllVertexCountsMatch<D,
+                                 GetAttributeVertexCount<D, std::decay_t<std::tuple_element_t<0, std::tuple<Attributes...>>>>::Count,
+                                 std::decay_t<Attributes>...>::Value &&
+            (std::same_as<
+                 typename std::decay_t<Attributes>::Type,
+                 typename D::template Attribute<std::decay_t<Attributes>::Semantic::Value>::ValueType> &&
+             ...))
+        void SetMeshData(Attributes&&... attributes);
 
     private:
+        template <auto S, typename T, std::size_t N>
+        void SetAttributeData(const FixedAttributeData<S, T, N>& attribute);
+
+        template <auto S, typename T, std::size_t N>
+        void SetAttributeData(const std::array<T, N>& data);
+
         std::vector<std::byte> mData;
-        std::vector<IT> mIndices;
         std::size_t mVertexCount;
     };
 }

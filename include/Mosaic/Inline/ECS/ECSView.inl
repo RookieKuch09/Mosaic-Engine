@@ -57,7 +57,7 @@ namespace Mosaic
 
         for (const Entity& entity : primarySet->Entities)
         {
-            if ((mManager.GetComponentSet<Components>()->Has(entity) and ...))
+            if ((mManager.GetComponentSet<Components>()->Has(entity) && ...))
             {
                 mEntities.push_back(entity);
             }

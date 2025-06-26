@@ -21,44 +21,38 @@ namespace Mosaic
         std::string ExitMessage = "Runtime Exception";
     };
 
+    using LogTargetID = std::uint32_t;
+
+    enum class LogSeverity
+    {
+        Success,
+        Notice,
+        Warning,
+        Error,
+    };
+
     class MOSAIC_PUBLIC_EXPOSURE Console
     {
     public:
-        using OutputID = std::uint32_t;
-
-        enum class OutputType
-        {
-            Terminal,
-            File,
-        };
-
-        enum class LogSeverity
-        {
-            Success,
-            Notice,
-            Warning,
-            Error,
-        };
-
-        [[nodiscard]] OutputID CreateFileOutput(const std::string& filepath);
+        [[nodiscard]] LogTargetID CreateLogTarget(const std::string& filepath);
 
         template <LogSeverity Severity, typename... Args>
-        void Log(const std::format_string<Args...>& message, Args&&... args);
+        static void Log(const std::format_string<Args...>& message, Args&&... args);
 
         template <LogSeverity Severity, typename... Args>
-        void Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args);
+        void Log(LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args);
 
         template <typename... Args>
-        [[noreturn]] void Halt(const std::format_string<Args...>& message, Args&&... args);
+        [[noreturn]] static void Halt(const std::format_string<Args...>& message, Args&&... args);
 
         template <typename... Args>
-        [[noreturn]] void Halt(OutputID outputID, const std::format_string<Args...>& message, Args&&... args);
+        [[noreturn]] void Halt(LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args);
 
         template <typename... Args>
-        [[noreturn]] void Halt(std::int32_t exitCode, const std::format_string<Args...>& message, Args&&... args);
+        [[noreturn]] static void Halt(std::int32_t exitCode, const std::format_string<Args...>& message, Args&&... args);
 
         template <typename... Args>
-        [[noreturn]] void Halt(std::int32_t exitCode, OutputID outputID, const std::format_string<Args...>& message, Args&&... args);
+        [[noreturn]] void Halt(std::int32_t exitCode, LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args);
 
     private:
         static constexpr const char* ANSI_RESET = "\x1b[0m";
@@ -89,27 +83,27 @@ namespace Mosaic
             std::string Filepath;
         };
 
-        std::unordered_map<OutputID, FileOutput> mFileOutputs;
-        std::unordered_map<std::string, OutputID> mFilepathIDs;
+        std::unordered_map<LogTargetID, FileOutput> mFileOutputs;
+        std::unordered_map<std::string, LogTargetID> mFilepathIDs;
 
-        OutputID mNextAvailableID;
-
-        template <LogSeverity Severity>
-        constexpr std::string GetSeverityPrefixForFileOutput();
+        LogTargetID mNextAvailableID;
 
         template <LogSeverity Severity>
-        constexpr std::string GetSeverityPrefixForTerminalOutput();
+        static constexpr std::string GetSeverityPrefixForFileOutput();
 
         template <LogSeverity Severity>
-        std::string GetFullPrefixForFileOutput();
+        static constexpr std::string GetSeverityPrefixForTerminalOutput();
 
         template <LogSeverity Severity>
-        std::string GetFullPrefixForTerminalOutput();
+        static std::string GetFullPrefixForFileOutput();
 
-        std::string GetFullPrefixForFileHalt();
-        std::string GetFullPrefixForTerminalHalt();
+        template <LogSeverity Severity>
+        static std::string GetFullPrefixForTerminalOutput();
 
-        std::string GetTerminalRedirect(OutputID outputID);
+        static std::string GetFullPrefixForFileHalt();
+        static std::string GetFullPrefixForTerminalHalt();
+
+        std::string GetTerminalRedirect(LogTargetID outputID);
 
         static void DispatchToTerminal(const std::string& message);
         static void DispatchToFile(FileOutput& fileOutput, const std::string& message);

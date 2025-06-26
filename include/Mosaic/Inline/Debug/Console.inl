@@ -4,7 +4,7 @@
 
 namespace Mosaic
 {
-    template <Console::LogSeverity Severity, typename... Args>
+    template <LogSeverity Severity, typename... Args>
     void Console::Log(const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
@@ -13,8 +13,8 @@ namespace Mosaic
         DispatchToTerminal(outputMessage);
     }
 
-    template <Console::LogSeverity Severity, typename... Args>
-    void Console::Log(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    template <LogSeverity Severity, typename... Args>
+    void Console::Log(LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
 
@@ -46,7 +46,7 @@ namespace Mosaic
     }
 
     template <typename... Args>
-    void Console::Halt(OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    void Console::Halt(LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
 
@@ -80,7 +80,7 @@ namespace Mosaic
     }
 
     template <typename... Args>
-    void Console::Halt(std::int32_t exitCode, OutputID outputID, const std::format_string<Args...>& message, Args&&... args)
+    void Console::Halt(std::int32_t exitCode, LogTargetID outputID, const std::format_string<Args...>& message, Args&&... args)
     {
         std::string formatted = std::format(message, std::forward<Args>(args)...);
 
@@ -102,7 +102,7 @@ namespace Mosaic
         throw EarlyExit(exitCode, "Console::Halt");
     }
 
-    template <Console::LogSeverity Severity>
+    template <LogSeverity Severity>
     constexpr std::string Console::GetSeverityPrefixForFileOutput()
     {
         switch (Severity)
@@ -128,7 +128,7 @@ namespace Mosaic
         return " [UNKNOWN] --> ";
     }
 
-    template <Console::LogSeverity Severity>
+    template <LogSeverity Severity>
     constexpr std::string Console::GetSeverityPrefixForTerminalOutput()
     {
         switch (Severity)
@@ -154,13 +154,13 @@ namespace Mosaic
         return " [UNKNOWN] --> ";
     }
 
-    template <Console::LogSeverity Severity>
+    template <LogSeverity Severity>
     std::string Console::GetFullPrefixForFileOutput()
     {
         return GetTimestampForFileOutput() + GetSeverityPrefixForFileOutput<Severity>();
     }
 
-    template <Console::LogSeverity Severity>
+    template <LogSeverity Severity>
     std::string Console::GetFullPrefixForTerminalOutput()
     {
         return GetTimestampForTerminalOutput() + GetSeverityPrefixForTerminalOutput<Severity>() + ANSI_RESET;

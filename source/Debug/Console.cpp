@@ -13,9 +13,9 @@ namespace Mosaic
     {
     }
 
-    Console::OutputID Console::CreateFileOutput(const std::string& filepath)
+    LogTargetID Console::CreateLogTarget(const std::string& filepath)
     {
-        OutputID outputID = 0;
+        LogTargetID outputID = 0;
 
         if (not mFilepathIDs.contains(filepath))
         {
@@ -44,9 +44,9 @@ namespace Mosaic
         return outputID;
     }
 
-    std::string Console::GetTerminalRedirect(OutputID outputID)
+    std::string Console::GetTerminalRedirect(LogTargetID outputID)
     {
-        return GetTimestampForTerminalOutput() + std::format(" {}{}[REDIRECT] ->{} OutputID {} does not exist or is unavailable. Output will be redirected to the terminal", ANSI_BRIGHT_CYAN, ANSI_BOLD, ANSI_RESET, outputID);
+        return GetTimestampForTerminalOutput() + std::format(" {}{}[REDIRECT] ->{} LogTargetID {} does not exist or is unavailable. Output will be redirected to the terminal", ANSI_BRIGHT_CYAN, ANSI_BOLD, ANSI_RESET, outputID);
     }
 
     std::string Console::GetFullPrefixForFileHalt()

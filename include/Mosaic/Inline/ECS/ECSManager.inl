@@ -38,7 +38,7 @@ namespace Mosaic
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mInstanceResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
+            mInstanceResources.Console.Log<LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
         }
     }
 
@@ -62,7 +62,7 @@ namespace Mosaic
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mInstanceResources.Console.Log<Console::LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
+            mInstanceResources.Console.Log<LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
         }
     }
 

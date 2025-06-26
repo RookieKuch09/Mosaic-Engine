@@ -4,6 +4,6 @@ namespace Mosaic
 {
     bool Entity::operator==(const Entity& other) const
     {
-        return ID == other.ID and Generation == other.Generation;
+        return ID == other.ID && Generation == other.Generation;
     }
 }

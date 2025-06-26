@@ -134,7 +134,7 @@ namespace Mosaic
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-                if (monitor and mode)
+                if (monitor && mode)
                 {
                     glfwSetWindowMonitor(static_cast<GLFWwindow*>(mHandle), monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
                 }
@@ -158,7 +158,7 @@ namespace Mosaic
                 GLFWmonitor* monitor = glfwGetPrimaryMonitor();
                 const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
-                if (monitor and mode)
+                if (monitor && mode)
                 {
                     glfwSetWindowMonitor(static_cast<GLFWwindow*>(mHandle), nullptr, 0, 0, mode->width, mode->height, mode->refreshRate);
                     glfwSetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED, GLFW_FALSE);

@@ -14,7 +14,7 @@ namespace Mosaic
         : mBackend(nullptr), mInstanceResources(resources)
     {
         // TODO: allow for custom initial values for the window backend
-        // TODO: switch backends based on macros or parameters
+        // TODO: switch backends based on macros || parameters
         mBackend = new GLFWWindowBackend(mInstanceResources, {800, 600}, {0, 0}, "Mosaic Window", WindowVisibility::Windowed);
 
         mInstanceResources.EventManager.AddResponder(this, &Window::OnWindowSizeChangeRequest);

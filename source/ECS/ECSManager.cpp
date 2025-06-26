@@ -60,7 +60,7 @@ namespace Mosaic
 
     bool ECSManager::EntityExists(Entity entity) const
     {
-        return entity.ID < mGenerations.size() and mGenerations[entity.ID] == entity.Generation;
+        return entity.ID < mGenerations.size() && mGenerations[entity.ID] == entity.Generation;
     }
 
     void ECSManager::AddSystem(const ECSSystem& system)
