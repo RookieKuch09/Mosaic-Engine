@@ -1,4 +1,4 @@
-#include <Mosaic/Renderer/Backend.hpp>
+#include <Mosaic/Rendering/Backend.hpp>
 
 namespace Mosaic
 {

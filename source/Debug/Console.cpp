@@ -17,7 +17,7 @@ namespace Mosaic
     {
         LogTargetID outputID = 0;
 
-        if (not mFilepathIDs.contains(filepath))
+        if (!mFilepathIDs.contains(filepath))
         {
             outputID = mNextAvailableID;
 
@@ -25,7 +25,7 @@ namespace Mosaic
 
             std::ofstream stream(filepath, std::ios::app);
 
-            if (not stream)
+            if (!stream)
             {
                 Halt(stream.is_open(), "Failed to create or open log file {}", filepath);
             }

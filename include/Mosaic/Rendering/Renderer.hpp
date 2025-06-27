@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Mosaic/Renderer/Events.hpp>
+#include <Mosaic/Rendering/Events.hpp>
 
 #include <Mosaic/Macros/Exposure.hpp>
 

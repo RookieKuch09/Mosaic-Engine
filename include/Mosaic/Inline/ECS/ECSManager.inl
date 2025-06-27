@@ -19,7 +19,7 @@ namespace Mosaic
 
         SparseSet<Component>* set = nullptr;
 
-        if (not mComponentStorage.contains(typeIndex))
+        if (!mComponentStorage.contains(typeIndex))
         {
             auto newSet = std::make_unique<SparseSet<Component>>();
             set = newSet.get();
@@ -30,7 +30,7 @@ namespace Mosaic
             set = static_cast<SparseSet<Component>*>(mComponentStorage[typeIndex].get());
         }
 
-        if (not set->Has(entity))
+        if (!set->Has(entity))
         {
             set->Insert(mInstanceResources.Console, entity, component);
         }
@@ -47,7 +47,7 @@ namespace Mosaic
     {
         auto typeIndex = std::type_index(typeid(Component));
 
-        if (not mComponentStorage.contains(typeIndex))
+        if (!mComponentStorage.contains(typeIndex))
         {
             return;
         }
@@ -77,7 +77,7 @@ namespace Mosaic
     {
         auto typeIndex = std::type_index(typeid(Component));
 
-        if (not mComponentStorage.contains(typeIndex))
+        if (!mComponentStorage.contains(typeIndex))
         {
             return nullptr;
         }

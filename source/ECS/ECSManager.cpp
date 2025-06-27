@@ -11,7 +11,7 @@ namespace Mosaic
     {
         EntityID entityID = 0;
 
-        if (not mFreedIDs.empty())
+        if (!mFreedIDs.empty())
         {
             entityID = mFreedIDs.back();
             mFreedIDs.pop_back();
@@ -41,7 +41,7 @@ namespace Mosaic
 
     void ECSManager::DestroyEntity(Entity entity)
     {
-        if (not EntityExists(entity))
+        if (!EntityExists(entity))
         {
             return;
         }

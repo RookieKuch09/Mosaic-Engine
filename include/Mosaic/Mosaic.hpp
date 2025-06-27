@@ -19,5 +19,9 @@
 #include <Mosaic/Window/Component.hpp>
 #include <Mosaic/Window/Window.hpp>
 
-#include <Mosaic/Renderer/Component.hpp>
-#include <Mosaic/Renderer/Renderer.hpp>
+#include <Mosaic/Rendering/Component.hpp>
+#include <Mosaic/Rendering/Renderer.hpp>
+
+#include <Mosaic/Rendering/Mesh/Attribute.hpp>
+#include <Mosaic/Rendering/Mesh/Descriptor.hpp>
+#include <Mosaic/Rendering/Mesh/Mesh.hpp>

@@ -24,7 +24,7 @@ namespace Mosaic
 
             auto& responders = responderIt->second;
 
-            while (not eventQueue.empty())
+            while (!eventQueue.empty())
             {
                 std::any& storedEvent = eventQueue.front();
 

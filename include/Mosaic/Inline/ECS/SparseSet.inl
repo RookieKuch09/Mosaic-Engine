@@ -22,7 +22,7 @@ namespace Mosaic
     template <typename Component>
     void SparseSet<Component>::Remove(Console& console, const Entity& entity)
     {
-        if (not EntityIndex.contains(entity.ID))
+        if (!EntityIndex.contains(entity.ID))
         {
             console.Log<LogSeverity::Warning>("Entity {} does not exist && cannot be deleted", entity.ID);
 
@@ -44,7 +44,7 @@ namespace Mosaic
     template <typename Component>
     Component* SparseSet<Component>::Get(const Entity& entity)
     {
-        if (not EntityIndex.contains(entity.ID))
+        if (!EntityIndex.contains(entity.ID))
         {
             return nullptr;
         }

@@ -50,7 +50,7 @@ namespace Mosaic
     {
         mHandle = glfwCreateWindow(mSize.x, mSize.y, mTitle.c_str(), nullptr, nullptr);
 
-        if (not mHandle)
+        if (!mHandle)
         {
             mInstanceResources.Console.Halt(1, "Failed to create window");
         }
@@ -120,7 +120,7 @@ namespace Mosaic
 
             case WindowVisibility::Fullscreen:
             {
-                if (not glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
+                if (!glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
                 {
                     int xpos, ypos, width, height;
 
@@ -144,7 +144,7 @@ namespace Mosaic
 
             case WindowVisibility::Borderless:
             {
-                if (not glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
+                if (!glfwGetWindowMonitor(static_cast<GLFWwindow*>(mHandle)))
                 {
                     int xpos, ypos, width, height;
 
@@ -217,7 +217,7 @@ namespace Mosaic
         {
             mVisibility = WindowVisibility::Fullscreen;
         }
-        else if (not glfwGetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED))
+        else if (!glfwGetWindowAttrib(static_cast<GLFWwindow*>(mHandle), GLFW_DECORATED))
         {
             mVisibility = WindowVisibility::Borderless;
         }

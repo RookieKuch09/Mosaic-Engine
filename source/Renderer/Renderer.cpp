@@ -1,7 +1,7 @@
-#include <Mosaic/Renderer/Component.hpp>
-#include <Mosaic/Renderer/Renderer.hpp>
+#include <Mosaic/Rendering/Component.hpp>
+#include <Mosaic/Rendering/Renderer.hpp>
 
-#include <Mosaic/Renderer/Backends/OpenGL.hpp>
+#include <Mosaic/Rendering/Backends/OpenGL.hpp>
 
 #include <Mosaic/Application/Application.hpp>
 #include <Mosaic/Application/Instance.hpp>

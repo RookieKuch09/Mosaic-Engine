@@ -12,7 +12,7 @@
 
 #include <Mosaic/Window/Window.hpp>
 
-#include <Mosaic/Renderer/Renderer.hpp>
+#include <Mosaic/Rendering/Renderer.hpp>
 
 namespace Mosaic
 {
