@@ -1,27 +1,25 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <tuple>
 #include <vector>
 
 namespace Mosaic
 {
-    enum class MeshPrimitive
-    {
-        Triangle,
-    };
-
-    template <PipelinePrimitive _Primitive>
-    class MeshFlags
-    {
-    public:
-        static constexpr PipelinePrimitive Primitive = _Primitive;
-    };
-
     template <auto _Semantic, typename _Type, std::size_t _Count>
     class MeshAttribute
     {
     public:
+        MeshAttribute() = delete;
+        ~MeshAttribute() = delete;
+
+        MeshAttribute(const MeshAttribute&) = delete;
+        MeshAttribute(MeshAttribute&&) noexcept = delete;
+
+        MeshAttribute& operator=(const MeshAttribute&) = delete;
+        MeshAttribute& operator=(MeshAttribute&&) noexcept = delete;
+
         using SemanticType = decltype(_Semantic);
         using ElementType = _Type;
 
@@ -67,8 +65,8 @@ namespace Mosaic
     {
     };
 
-    template <typename First, typename... Rest>
-    struct AreAttributeSemanticsSameType<First, Rest...> : std::bool_constant<((std::same_as<First, Rest>) && ...) && AreAttributeSemanticsSameType<Rest...>::value>
+    template <typename First, typename Second, typename... Rest>
+    struct AreAttributeSemanticsSameType<First, Second, Rest...> : std::bool_constant<std::is_same_v<First, Second> && AreAttributeSemanticsSameType<Second, Rest...>::value>
     {
     };
 
@@ -138,38 +136,136 @@ namespace Mosaic
     {
     };
 
-    enum class PipelineDepthTestMode
+    enum class PipelineDepthTestState
     {
+        Enabled,
         Disabled,
+    };
+
+    enum class PipelineDepthTestOperation
+    {
+        Never,
         Less,
+        LessOrEqual,
         Equal,
+        NotEqual,
+        GreaterOrEqual,
         Greater,
+        Always,
     };
 
-    enum class PipelinePrimitiveMode
+    template <PipelineDepthTestState _State, PipelineDepthTestOperation _Operation>
+    class PipelineDepthTestSettings
     {
-        Standard,
+    public:
+        constexpr static PipelineDepthTestState State = _State;
+        constexpr static PipelineDepthTestOperation Operation = _Operation;
+    };
+
+    template <typename>
+    struct IsPipelineDepthTestSettingsType : std::false_type
+    {
+    };
+
+    template <PipelineDepthTestState _State, PipelineDepthTestOperation _Operation>
+    struct IsPipelineDepthTestSettingsType<PipelineDepthTestSettings<_State, _Operation>> : std::true_type
+    {
+    };
+
+    enum class PipelineDrawMode
+    {
+        Fill,
         Wireframe,
+        Point,
     };
 
-    enum class PipelinePrimitive
+    enum class PipelineTopology
     {
-        Triangle,
+        Points,
+        Lines,
+        Triangles,
     };
 
-    enum class PipelineTransparencyMode
+    enum class PipelineBlendState
     {
+        Enabled,
         Disabled,
-
     };
 
-    template <PipelinePrimitive _Primitive, PipelineDepthTest _DepthTest, PipelineDrawMode _DrawMode>
+    enum class PipelineBlendOperation
+    {
+        None,
+        Add,
+        Subtract,
+        ReverseSubtract,
+        Minimum,
+        Maximum,
+    };
+
+    enum class PipelineBlendFactor
+    {
+        None,
+        Zero,
+        One,
+        SourceColour,
+        SourceColourComplement,
+        DestinationColour,
+        DestinationColourComplement,
+        SourceAlpha,
+        SourceAlphaComplement,
+        DestinationAlpha,
+        DestinationAlphaComplement,
+        ConstantColour,
+        ConstantColourComplement,
+        ConstantAlpha,
+        ConstantAlphaComplement,
+    };
+
+    template <PipelineBlendState _BlendState,
+              PipelineBlendOperation _ColourOperation,
+              PipelineBlendFactor _SourceColourFactor,
+              PipelineBlendFactor _DestinationColourFactor,
+              PipelineBlendOperation _AlphaOperation,
+              PipelineBlendFactor _SourceAlphaFactor,
+              PipelineBlendFactor _DestinationAlphaFactor>
+    class PipelineBlendSettings
+    {
+    public:
+        constexpr static PipelineBlendState BlendState = _BlendState;
+        constexpr static PipelineBlendOperation ColourOperation = _ColourOperation;
+        constexpr static PipelineBlendFactor SourceColourFactor = _SourceColourFactor;
+        constexpr static PipelineBlendFactor DestinationColourFactor = _DestinationColourFactor;
+        constexpr static PipelineBlendOperation AlphaOperation = _AlphaOperation;
+        constexpr static PipelineBlendFactor SourceAlphaFactor = _SourceAlphaFactor;
+        constexpr static PipelineBlendFactor DestinationAlphaFactor = _DestinationAlphaFactor;
+    };
+
+    template <typename>
+    struct IsPipelineBlendSettingsType : std::false_type
+    {
+    };
+
+    template <PipelineBlendState _BlendState,
+              PipelineBlendOperation _ColourOperation,
+              PipelineBlendFactor _SourceColourFactor,
+              PipelineBlendFactor _DestinationColourFactor,
+              PipelineBlendOperation _AlphaOperation,
+              PipelineBlendFactor _SourceAlphaFactor,
+              PipelineBlendFactor _DestinationAlphaFactor>
+    struct IsPipelineBlendSettingsType<PipelineBlendSettings<_BlendState, _ColourOperation, _SourceColourFactor, _DestinationColourFactor, _AlphaOperation, _SourceAlphaFactor, _DestinationAlphaFactor>> : std::true_type
+    {
+    };
+
+    template <PipelineTopology _Topology, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
+    requires IsPipelineDepthTestSettingsType<_DepthTestSettings>::value && IsPipelineBlendSettingsType<_BlendSettings>::value
     class PipelineFlags
     {
     public:
-        static constexpr PipelinePrimitive Primitive = _Primitive;
-        static constexpr PipelineDepthTest DepthTest = _DepthTest;
+        static constexpr PipelineTopology Topology = _Topology;
         static constexpr PipelineDrawMode DrawMode = _DrawMode;
+
+        using DepthTestSettings = _DepthTestSettings;
+        using BlendSettings = _BlendSettings;
     };
 
     template <typename T>
@@ -177,8 +273,9 @@ namespace Mosaic
     {
     };
 
-    template <PipelinePrimitive _Primitive, PipelineDepthTest _DepthTest, PipelineDrawMode _DrawMode>
-    struct IsPipelineFlagsType<PipelineFlags<_Primitive, _DepthTest, _DrawMode>> : std::true_type
+    template <PipelineTopology _Topology, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
+    requires IsPipelineDepthTestSettingsType<_DepthTestSettings>::value && IsPipelineBlendSettingsType<_BlendSettings>::value
+    struct IsPipelineFlagsType<PipelineFlags<_Topology, _DrawMode, _DepthTestSettings, _BlendSettings>> : std::true_type
     {
     };
 
@@ -239,16 +336,19 @@ namespace Mosaic
     template <typename Descriptor>
     class Mesh
     {
+        // TODO: implement mesh
     };
 
     template <typename Descriptor>
     class Material
     {
+        // TODO: implement material
     };
 
     template <typename Descriptor>
     class Pipeline
     {
+        // TODO: implement pipeline
     };
 
     class MeshHandle
@@ -291,7 +391,7 @@ namespace Mosaic
         {
             if (ComponentNotFound(renderComponent))
             {
-                mRenderComponents.push_back(renderComponent);
+                mRenderComponents.push_back(&renderComponent);
             }
             else
             {
@@ -302,9 +402,7 @@ namespace Mosaic
     private:
         bool ComponentNotFound(const ComponentType& renderComponent) const
         {
-            auto it = std::find(mRenderComponents.begin(), mRenderComponents.end(), &renderComponent);
-
-            return it == mRenderComponents.end();
+            return std::find(mRenderComponents.begin(), mRenderComponents.end(), &renderComponent) == mRenderComponents.end();
         }
 
         std::vector<const ComponentType*> mRenderComponents;
