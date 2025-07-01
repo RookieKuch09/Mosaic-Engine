@@ -7,126 +7,12 @@
 
 namespace Mosaic
 {
-    template <auto _Semantic, typename _Type, std::size_t _Count>
-    class MeshAttribute
-    {
-    public:
-        MeshAttribute() = delete;
-        ~MeshAttribute() = delete;
-
-        MeshAttribute(const MeshAttribute&) = delete;
-        MeshAttribute(MeshAttribute&&) noexcept = delete;
-
-        MeshAttribute& operator=(const MeshAttribute&) = delete;
-        MeshAttribute& operator=(MeshAttribute&&) noexcept = delete;
-
-        using SemanticType = decltype(_Semantic);
-        using ElementType = _Type;
-
-        static constexpr std::size_t ElementCount = _Count;
-        static constexpr SemanticType SemanticValue = _Semantic;
-    };
-
-    template <typename T>
-    struct IsMeshAttributeType : std::false_type
-    {
-    };
-
-    template <auto _Semantic, typename _Type, std::size_t _Count>
-    struct IsMeshAttributeType<MeshAttribute<_Semantic, _Type, _Count>> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct GetSemantic
-    {
-        static constexpr auto Value = T::SemanticValue;
-        using Type = typename T::SemanticType;
-    };
-
-    template <auto...>
-    struct AreAttributeSemanticsUnique : std::true_type
-    {
-    };
-
-    template <auto First, auto... Rest>
-    struct AreAttributeSemanticsUnique<First, Rest...> : std::bool_constant<((First != Rest) && ...) && AreAttributeSemanticsUnique<Rest...>::value>
-    {
-    };
-
-    template <typename... Attributes>
-    struct AreAllAttributeSemanticsValid
-    {
-        static constexpr bool value = AreAttributeSemanticsUnique<GetSemantic<Attributes>::Value...>::value;
-    };
-
-    template <typename...>
-    struct AreAttributeSemanticsSameType : std::true_type
-    {
-    };
-
-    template <typename First, typename Second, typename... Rest>
-    struct AreAttributeSemanticsSameType<First, Second, Rest...> : std::bool_constant<std::is_same_v<First, Second> && AreAttributeSemanticsSameType<Second, Rest...>::value>
-    {
-    };
-
-    template <typename... Attributes>
-    struct AreAllAttributeSemanticsSameType
-    {
-        static constexpr bool value = AreAttributeSemanticsSameType<typename GetSemantic<Attributes>::Type...>::value;
-    };
-
-    template <typename... _Attributes>
-    concept MeshAttributesAreValid = AreAllAttributeSemanticsValid<_Attributes...>::value &&
-                                     AreAllAttributeSemanticsSameType<_Attributes...>::value &&
-                                     (IsMeshAttributeType<_Attributes>::value && ...);
-
-    template <typename... _Attributes>
-    requires MeshAttributesAreValid<_Attributes...>
-    class MeshAttributePack
-    {
-    public:
-        template <std::size_t N>
-        using GetAttributeByIndex = typename std::tuple_element<N, std::tuple<_Attributes...>>::type;
-
-        template <auto _Semantic>
-        using GetAttributeBySemantic = int; // TODO: retrieve mesh attribute by semantic
-
-        template <auto _Semantic>
-        static constexpr bool HasAttribute = ((GetAttributeSemantic<_Attributes>() == _Semantic) || ...);
-
-    private:
-        template <typename Attribute>
-        static constexpr auto GetAttributeSemantic()
-        {
-            return Attribute::SemanticValue;
-        }
-    };
-
-    template <typename _AttributePack, typename _Flags>
-    class MeshDescriptor
-    {
-    public:
-        using AttributePack = _AttributePack;
-        using Flags = _Flags;
-    };
-
-    template <typename T>
-    struct IsMeshDescriptorType : std::false_type
-    {
-    };
-
-    template <typename... Args>
-    struct IsMeshDescriptorType<MeshDescriptor<Args...>> : std::true_type
-    {
-    };
-
     template <typename... Args>
     class MaterialDescriptor
     {
     };
 
-    template <typename T>
+    template <typename>
     struct IsMaterialDescriptorType : std::false_type
     {
     };
@@ -268,7 +154,7 @@ namespace Mosaic
         using BlendSettings = _BlendSettings;
     };
 
-    template <typename T>
+    template <typename>
     struct IsPipelineFlagsType : std::false_type
     {
     };
@@ -296,7 +182,7 @@ namespace Mosaic
         static constexpr bool HasShader = ((_ShaderTypes == _ShaderType) || ...);
     };
 
-    template <typename T>
+    template <typename>
     struct IsShaderOrderType : std::false_type
     {
     };
@@ -323,7 +209,7 @@ namespace Mosaic
         using Flags = _Flags;
     };
 
-    template <typename T>
+    template <typename>
     struct IsPipelineDescriptorType : std::false_type
     {
     };
@@ -349,11 +235,6 @@ namespace Mosaic
     class Pipeline
     {
         // TODO: implement pipeline
-    };
-
-    class MeshHandle
-    {
-        std::uint32_t mID;
     };
 
     class MaterialHandle
