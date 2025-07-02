@@ -1,13 +1,13 @@
 #pragma once
 
-#include <Mosaic/Rendering/Mesh/Validation.hpp>
+#include <Mosaic/Rendering/Mesh/Descriptor.hpp>
 
 #include <cstdint>
 
 namespace Mosaic
 {
     template <typename _Descriptor>
-    requires IsMeshDescriptorType<_Descriptor>::value
+    requires IsMeshDescriptorType<_Descriptor>
     class Mesh
     {
     public:

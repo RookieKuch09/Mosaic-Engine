@@ -65,7 +65,7 @@ namespace Mosaic
         Point,
     };
 
-    enum class PipelineTopology
+    enum class PipelinePrimitive
     {
         Points,
         Lines,
@@ -142,12 +142,12 @@ namespace Mosaic
     {
     };
 
-    template <PipelineTopology _Topology, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
+    template <PipelinePrimitive _Primitive, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
     requires IsPipelineDepthTestSettingsType<_DepthTestSettings>::value && IsPipelineBlendSettingsType<_BlendSettings>::value
     class PipelineFlags
     {
     public:
-        static constexpr PipelineTopology Topology = _Topology;
+        static constexpr PipelinePrimitive Primitive = _Primitive;
         static constexpr PipelineDrawMode DrawMode = _DrawMode;
 
         using DepthTestSettings = _DepthTestSettings;
@@ -159,9 +159,9 @@ namespace Mosaic
     {
     };
 
-    template <PipelineTopology _Topology, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
+    template <PipelinePrimitive _Primitive, PipelineDrawMode _DrawMode, typename _DepthTestSettings, typename _BlendSettings>
     requires IsPipelineDepthTestSettingsType<_DepthTestSettings>::value && IsPipelineBlendSettingsType<_BlendSettings>::value
-    struct IsPipelineFlagsType<PipelineFlags<_Topology, _DrawMode, _DepthTestSettings, _BlendSettings>> : std::true_type
+    struct IsPipelineFlagsType<PipelineFlags<_Primitive, _DrawMode, _DepthTestSettings, _BlendSettings>> : std::true_type
     {
     };
 

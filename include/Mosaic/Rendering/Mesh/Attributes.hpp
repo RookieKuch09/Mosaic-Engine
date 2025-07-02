@@ -1,98 +1,165 @@
 #pragma once
 
-#include <Mosaic/Rendering/Mesh/Validation.hpp>
+#include <Mosaic/Rendering/Mesh/Scalar.hpp>
 
-#include <tuple>
+#include <string_view>
+
+#include <magic_enum/magic_enum.hpp>
 
 namespace Mosaic
 {
-    template <typename _Type>
-    requires std::is_arithmetic_v<_Type>
-    class MeshScalar
+    struct MeshAttributeReflection
     {
-    public:
-        MeshScalar() = delete;
-        ~MeshScalar() = delete;
+        std::string_view Semantic;
 
-        MeshScalar(const MeshScalar&) = delete;
-        MeshScalar(MeshScalar&&) noexcept = delete;
+        std::size_t ElementCount;
+        std::size_t ElementSize;
 
-        MeshScalar& operator=(const MeshScalar&) = delete;
-        MeshScalar& operator=(MeshScalar&&) noexcept = delete;
+        std::size_t ElementScalarCount;
+        std::size_t ElementScalarSize;
 
-        using Type = _Type;
-
-        static constexpr std::size_t Count = 1;
+        MeshAttributeScalarType ElementScalarType;
     };
 
-    template <typename _Type, std::size_t _Count>
-    requires std::is_arithmetic_v<_Type> && (_Count > 0)
-    class MeshScalar<glm::vec<_Count, _Type>>
-    {
-    public:
-        MeshScalar() = delete;
-        ~MeshScalar() = delete;
-
-        MeshScalar(const MeshScalar&) = delete;
-        MeshScalar(MeshScalar&&) noexcept = delete;
-
-        MeshScalar& operator=(const MeshScalar&) = delete;
-        MeshScalar& operator=(MeshScalar&&) noexcept = delete;
-
-        using Type = _Type;
-
-        static constexpr std::size_t Count = _Count;
-    };
-
-    template <auto _Semantic, typename _Type, std::size_t _Count>
-    requires std::is_enum_v<decltype(_Semantic)> && IsMeshScalarType<_Type>::value
+    template <auto _Semantic, typename _Type, std::size_t _Count = 1>
+    requires std::is_enum_v<decltype(_Semantic)> && IsMeshAttributeScalarInfoCompatible<_Type> && (_Count > 0) && std::is_arithmetic_v<typename MeshAttributeScalarInfo<_Type>::Type>
     class MeshAttribute
     {
     public:
+        using ElementScalarType = typename MeshAttributeScalarInfo<_Type>::Type;
+
+    private:
+        static consteval MeshAttributeScalarType ElementScalarTypeEnum()
+        {
+            if constexpr (std::is_same_v<ElementScalarType, std::int8_t>)
+            {
+                return MeshAttributeScalarType::I8;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::int16_t>)
+            {
+                return MeshAttributeScalarType::I16;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::int32_t>)
+            {
+                return MeshAttributeScalarType::I32;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::int64_t>)
+            {
+                return MeshAttributeScalarType::I64;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::uint8_t>)
+            {
+                return MeshAttributeScalarType::U8;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::uint16_t>)
+            {
+                return MeshAttributeScalarType::U16;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::uint32_t>)
+            {
+                return MeshAttributeScalarType::U32;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, std::uint64_t>)
+            {
+                return MeshAttributeScalarType::U64;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, float>)
+            {
+                return MeshAttributeScalarType::F32;
+            }
+            else if constexpr (std::is_same_v<ElementScalarType, double>)
+            {
+                return MeshAttributeScalarType::F64;
+            }
+        }
+
+    public:
         MeshAttribute() = delete;
-        ~MeshAttribute() = delete;
-
-        MeshAttribute(const MeshAttribute&) = delete;
-        MeshAttribute(MeshAttribute&&) noexcept = delete;
-
-        MeshAttribute& operator=(const MeshAttribute&) = delete;
-        MeshAttribute& operator=(MeshAttribute&&) noexcept = delete;
 
         using SemanticType = decltype(_Semantic);
+
         using ElementType = _Type;
 
         static constexpr std::size_t ElementCount = _Count;
+        static constexpr std::size_t ElementSize = sizeof(ElementType);
+
+        static constexpr std::size_t ElementScalarCount = MeshAttributeScalarInfo<_Type>::Count;
+        static constexpr std::size_t ElementScalarSize = sizeof(ElementScalarType);
+
         static constexpr SemanticType SemanticValue = _Semantic;
+
+        static consteval MeshAttributeReflection Reflect()
+        {
+            return MeshAttributeReflection{
+                .Semantic = magic_enum::enum_name(SemanticValue),
+                .ElementCount = ElementCount,
+                .ElementSize = ElementSize,
+                .ElementScalarCount = ElementScalarCount,
+                .ElementScalarSize = ElementScalarSize,
+                .ElementScalarType = ElementScalarTypeEnum(),
+            };
+        }
     };
 
+    template <typename>
+    inline constexpr bool IsMeshAttributeType = false;
+
+    template <auto _Semantic, typename _Type, std::size_t _Count>
+    inline constexpr bool IsMeshAttributeType<MeshAttribute<_Semantic, _Type, _Count>> = true;
+
+    template <typename _Attribute>
+    requires IsMeshAttributeType<_Attribute>
+    struct MeshAttributeTraits
+    {
+        MeshAttributeTraits() = delete;
+
+        using Type = typename _Attribute::SemanticType;
+
+        static constexpr auto Value = _Attribute::SemanticValue;
+    };
+
+    template <auto...>
+    inline constexpr bool MeshAttributeSemanticsAreUnique = true;
+
+    template <auto _First, auto... _Rest>
+    inline constexpr bool MeshAttributeSemanticsAreUnique<_First, _Rest...> = std::bool_constant<((_First != _Rest) && ...) && MeshAttributeSemanticsAreUnique<_Rest...>>::value;
+
+    template <typename _First, typename... _Rest>
+    constexpr bool MeshAttributeSemanticsAreSameType = (std::is_same_v<_First, _Rest> && ...);
+
     template <typename... _Attributes>
-    requires MeshAttributesAreValid<_Attributes...>
+    constexpr bool MeshAttributesAreAllValid = (IsMeshAttributeType<_Attributes> && ...);
+
+    template <typename... _Attributes>
+    requires MeshAttributeSemanticsAreUnique<MeshAttributeTraits<_Attributes>::Value...> &&
+             MeshAttributeSemanticsAreSameType<typename MeshAttributeTraits<_Attributes>::Type...> &&
+             MeshAttributesAreAllValid<_Attributes...>
     class MeshAttributePack
     {
+    private:
+        template <typename _Attribute>
+        static consteval auto GetAttributeSemantic()
+        {
+            return _Attribute::SemanticValue;
+        }
+
     public:
         MeshAttributePack() = delete;
-        ~MeshAttributePack() = delete;
-
-        MeshAttributePack(const MeshAttributePack&) = delete;
-        MeshAttributePack(MeshAttributePack&&) noexcept = delete;
-
-        MeshAttributePack& operator=(const MeshAttributePack&) = delete;
-        MeshAttributePack& operator=(MeshAttributePack&&) noexcept = delete;
 
         template <std::size_t N>
         using GetAttributeByIndex = typename std::tuple_element<N, std::tuple<_Attributes...>>::type;
 
         template <auto _Semantic>
-        using GetAttributeBySemantic = int; // TODO: retrieve mesh attribute by semantic
-
-        template <auto _Semantic>
         static constexpr bool HasAttribute = ((GetAttributeSemantic<_Attributes>() == _Semantic) || ...);
 
-    private:
-        template <typename Attribute>
-        static constexpr auto GetAttributeSemantic()
-        {
-            return Attribute::SemanticValue;
-        }
+        static constexpr std::size_t AttributeCount = sizeof...(_Attributes);
+
+        static constexpr std::size_t VertexSize = ((_Attributes::ElementCount * _Attributes::ElementSize) + ...);
     };
+
+    template <typename>
+    inline constexpr bool IsMeshAttributePackType = false;
+
+    template <typename... _Attributes>
+    inline constexpr bool IsMeshAttributePackType<MeshAttributePack<_Attributes...>> = true;
 }

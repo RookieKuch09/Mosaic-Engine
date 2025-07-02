@@ -1,28 +1,45 @@
 #pragma once
 
+#include <Mosaic/Rendering/Mesh/Attributes.hpp>
+#include <Mosaic/Rendering/Mesh/Flags.hpp>
+
 namespace Mosaic
 {
-    enum class MeshTopography
+    struct MeshDescriptorReflection
     {
-        Points,
-        Lines,
-        Triangles,
+        std::size_t VertexSize;
+        std::size_t AttributeCount;
+
+        MeshPrimitive Primitive;
+        MeshIndexing Indexing;
     };
 
-    template <MeshTopography _Topography>
-    class MeshFlags
-    {
-    public:
-        static constexpr MeshTopography Topography = _Topography;
-    };
-
-    // TODO: ensure vertex count is supported by topography
-    // TODO: cache useful info (vertex length, etc.)
     template <typename _AttributePack, typename _Flags>
+    requires IsMeshAttributePackType<_AttributePack> && IsMeshFlagsType<_Flags>
     class MeshDescriptor
     {
     public:
+        MeshDescriptor() = delete;
+
         using AttributePack = _AttributePack;
         using Flags = _Flags;
+
+        static constexpr std::size_t VertexSize = _AttributePack::VertexSize;
+
+        static consteval MeshDescriptorReflection Reflect()
+        {
+            return MeshDescriptorReflection{
+                .VertexSize = VertexSize,
+                .AttributeCount = AttributePack::AttributeCount,
+                .Primitive = Flags::Primitive,
+                .Indexing = Flags::Indexing,
+            };
+        }
     };
+
+    template <typename>
+    inline constexpr bool IsMeshDescriptorType = false;
+
+    template <typename _AttributePack, typename _Flags>
+    inline constexpr bool IsMeshDescriptorType<MeshDescriptor<_AttributePack, _Flags>> = true;
 }

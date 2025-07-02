@@ -1,4 +1,4 @@
-#include <Mosaic/Rendering/Backends/OpenGL.hpp>
+#include <Mosaic/Rendering/Instance/Backends/OpenGL.hpp>
 
 #include <Mosaic/Application/Resources.hpp>
 
@@ -7,7 +7,7 @@
 #include <Mosaic/Window/Backend.hpp>
 #include <Mosaic/Window/Window.hpp>
 
-#include <Mosaic/Rendering/Renderer.hpp>
+#include <Mosaic/Rendering/Instance/Renderer.hpp>
 
 #include <GL/glew.h>
 
