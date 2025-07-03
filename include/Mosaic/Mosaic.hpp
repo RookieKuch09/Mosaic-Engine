@@ -22,3 +22,7 @@
 
 #include <Mosaic/Rendering/Instance/Component.hpp>
 #include <Mosaic/Rendering/Instance/Renderer.hpp>
+
+#include <Mosaic/Rendering/Mesh/Attributes.hpp>
+#include <Mosaic/Rendering/Mesh/Descriptor.hpp>
+#include <Mosaic/Rendering/Mesh/Resource.hpp>
