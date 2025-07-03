@@ -155,6 +155,12 @@ namespace Mosaic
         static constexpr std::size_t AttributeCount = sizeof...(_Attributes);
 
         static constexpr std::size_t VertexSize = ((_Attributes::ElementCount * _Attributes::ElementSize) + ...);
+
+        template <typename _Function>
+        static consteval void ForEach(_Function&& function)
+        {
+            (function.template operator()<_Attributes>(), ...);
+        }
     };
 
     template <typename>

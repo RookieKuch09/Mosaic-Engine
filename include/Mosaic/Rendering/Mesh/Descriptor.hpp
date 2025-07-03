@@ -5,6 +5,7 @@
 
 namespace Mosaic
 {
+    template <std::size_t N>
     struct MeshDescriptorReflection
     {
         std::size_t VertexSize;
@@ -12,12 +13,21 @@ namespace Mosaic
 
         MeshPrimitive Primitive;
         MeshIndexing Indexing;
+
+        std::array<MeshAttributeReflection, N> AttributeReflections;
     };
 
     template <typename _AttributePack, typename _Flags>
     requires IsMeshAttributePackType<_AttributePack> && IsMeshFlagsType<_Flags>
     class MeshDescriptor
     {
+    private:
+        template <typename... _Attributes, std::size_t... Is>
+        static consteval std::array<MeshAttributeReflection, sizeof...(_Attributes)> ReflectAttributes(std::tuple<_Attributes...>, std::index_sequence<Is...>)
+        {
+            return {_Attributes::Reflect()...};
+        }
+
     public:
         MeshDescriptor() = delete;
 
@@ -26,13 +36,25 @@ namespace Mosaic
 
         static constexpr std::size_t VertexSize = _AttributePack::VertexSize;
 
-        static consteval MeshDescriptorReflection Reflect()
+        static consteval MeshDescriptorReflection<AttributePack::AttributeCount> Reflect()
         {
-            return MeshDescriptorReflection{
+            std::array<MeshAttributeReflection, AttributePack::AttributeCount> reflections{};
+
+            std::size_t i = 0;
+
+            auto function = [&]<typename T>() consteval
+            {
+                reflections[i++] = T::Reflect();
+            };
+
+            AttributePack::ForEach(function);
+
+            return MeshDescriptorReflection<AttributePack::AttributeCount>{
                 .VertexSize = VertexSize,
                 .AttributeCount = AttributePack::AttributeCount,
                 .Primitive = Flags::Primitive,
                 .Indexing = Flags::Indexing,
+                .AttributeReflections = reflections,
             };
         }
     };
