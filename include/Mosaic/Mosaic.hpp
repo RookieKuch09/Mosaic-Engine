@@ -4,7 +4,8 @@
 #include <Mosaic/Application/Instance.hpp>
 #include <Mosaic/Application/Resources.hpp>
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
+#include <Mosaic/Debug/Console/Severity.hpp>
 
 #include <Mosaic/ECS/ECSManager.hpp>
 #include <Mosaic/ECS/ECSView.hpp>

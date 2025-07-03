@@ -5,7 +5,7 @@
 
 #include <Mosaic/Application/Resources.hpp>
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -40,7 +40,7 @@ namespace Mosaic
     {
         if (glfwInit() != GLFW_TRUE)
         {
-            mInstanceResources.Console.Halt(1, "Failed to initialise window backend");
+            // TODO: replace with error management
         }
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -52,7 +52,7 @@ namespace Mosaic
 
         if (!mHandle)
         {
-            mInstanceResources.Console.Halt(1, "Failed to create window");
+            // TODO: replace with error management
         }
     }
 

@@ -2,7 +2,7 @@
 
 #include <Mosaic/Application/Resources.hpp>
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
 
 #include <Mosaic/Window/Backend.hpp>
 #include <Mosaic/Window/Window.hpp>
@@ -30,7 +30,6 @@ namespace Mosaic
     void OpenGLRendererBackend::Create()
     {
         auto& window = mInstanceResources.Window.mBackend;
-        auto& console = mInstanceResources.Console;
 
         std::uint32_t swapInterval = GetSwapInterval();
 
@@ -39,7 +38,7 @@ namespace Mosaic
 
         if (glewInit() != GLEW_OK)
         {
-            console.Halt(1, "Failed to load OpenGL extensions from drivers");
+            // TODO: replace with error management
         }
 
         auto& r = mClearColour.x;

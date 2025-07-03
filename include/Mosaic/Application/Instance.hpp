@@ -8,7 +8,7 @@
 #include <Mosaic/ECS/ECSManager.hpp>
 #include <Mosaic/ECS/EventManager.hpp>
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
 
 #include <Mosaic/Window/Window.hpp>
 

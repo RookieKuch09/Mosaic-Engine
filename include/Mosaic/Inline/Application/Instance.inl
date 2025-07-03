@@ -38,11 +38,9 @@ namespace Mosaic
 
             return mExitCode;
         }
-        catch (const EarlyExit& earlyExit)
+        catch (...)
         {
-            mConsole.Log<LogSeverity::Notice>("Early application exit: {} (exit code: {})", earlyExit.ExitMessage, earlyExit.ExitCode);
-
-            return earlyExit.ExitCode;
+            // TODO: replace with log statement
         }
     }
 

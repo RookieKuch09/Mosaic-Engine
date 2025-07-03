@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
 
 #include <Mosaic/Macros/Exposure.hpp>
 

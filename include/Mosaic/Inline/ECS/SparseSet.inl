@@ -5,11 +5,11 @@
 namespace Mosaic
 {
     template <typename Component>
-    void SparseSet<Component>::Insert(Console& console, const Entity& entity, const Component& component)
+    void SparseSet<Component>::Insert(Console&, const Entity& entity, const Component& component)
     {
         if (EntityIndex.contains(entity.ID))
         {
-            console.Log<LogSeverity::Warning>("Entity {} already exists && cannot be recreated", entity.ID);
+            // TODO: replace with log statement
 
             return;
         }
@@ -20,11 +20,11 @@ namespace Mosaic
     }
 
     template <typename Component>
-    void SparseSet<Component>::Remove(Console& console, const Entity& entity)
+    void SparseSet<Component>::Remove(Console&, const Entity& entity)
     {
         if (!EntityIndex.contains(entity.ID))
         {
-            console.Log<LogSeverity::Warning>("Entity {} does not exist && cannot be deleted", entity.ID);
+            // TODO: replace with log statement
 
             return;
         }

@@ -2,7 +2,7 @@
 
 #include <Mosaic/Application/Instance.hpp>
 
-#include <Mosaic/Debug/Console.hpp>
+#include <Mosaic/Debug/Console/Resource.hpp>
 
 #include <Mosaic/ECS/ECSManager.hpp>
 #include <Mosaic/ECS/ECSView.hpp>
@@ -38,7 +38,7 @@ namespace Mosaic
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mInstanceResources.Console.Log<LogSeverity::Warning>("Component of type {} already assigned to Entity {}", name, entity.ID);
+            // TODO: replace with log statement
         }
     }
 
@@ -62,7 +62,7 @@ namespace Mosaic
         {
             auto name = boost::typeindex::type_id<Component>().pretty_name();
 
-            mInstanceResources.Console.Log<LogSeverity::Warning>("Component of type {} is not associated with Entity {}", name, entity.ID);
+            // TODO: replace with log statement
         }
     }
 
