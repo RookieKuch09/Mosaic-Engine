@@ -16,87 +16,51 @@ namespace Mosaic
 {
     class Application;
 
-    struct ConsoleFileOutput
+    class ConsoleFileOutput
     {
-        std::ofstream Stream;
-        std::string Filepath;
+    private:
+        std::ofstream mStream;
+        std::string mFilepath;
+
+        friend class Console;
     };
+
+    using ConsoleEngineLogNotice = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_NOTICE, ConsoleTextColour::Blue, ConsoleTextStyle::Bold>;
+    using ConsoleEngineLogSuccess = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_SUCCESS, ConsoleTextColour::Green, ConsoleTextStyle::Bold>;
+    using ConsoleEngineLogWarning = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_WARNING, ConsoleTextColour::Yellow, ConsoleTextStyle::Bold>;
+    using ConsoleEngineLogError = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_ERROR, ConsoleTextColour::Red, ConsoleTextStyle::Bold>;
 
     class Console
     {
     private:
-        template <std::size_t N1, std::size_t N2>
-        static consteval auto ConcatArrays(const std::array<char, N1>& a, const std::array<char, N2>& b)
-        {
-            std::array<char, N1 + N2> result{};
-
-            for (std::size_t i = 0; i < N1; i++)
-            {
-                result[i] = a[i];
-            }
-
-            for (std::size_t i = 0; i < N2; i++)
-            {
-                result[N1 + i] = b[i];
-            }
-
-            return result;
-        }
-
-        template <std::size_t N>
-        static consteval auto ToArray(std::string_view sv)
-        {
-            std::array<char, N> array = {};
-
-            for (std::size_t i = 0; i < N; i++)
-            {
-                array[i] = sv[i];
-            }
-
-            return array;
-        }
-
         template <typename _Severity>
         requires IsConsoleSeverityLevelType<_Severity>
         static consteval auto GetLogPrefixStyled()
         {
-            constexpr auto semantic_sv = magic_enum::enum_name(_Severity::SemanticValue);
-            constexpr auto flags = _Severity::ANSIPrefix;
-            constexpr auto reset = ToArray<4>("\033[0m");
+            constexpr auto SemanticString = magic_enum::enum_name(_Severity::SemanticValue);
+            constexpr auto Flags = _Severity::ANSIPrefix;
+            constexpr auto Reset = ToArray("\033[0m");
 
-            constexpr auto open_bracket = ToArray<1>("[");
-            constexpr auto close_bracket_colon = ToArray<2>("]:");
-            constexpr auto space = ToArray<1>(" ");
+            constexpr auto OpenBracket = ToArray("[");
+            constexpr auto CloseBracket = ToArray("]:");
 
-            // Convert semantic name to array
-            constexpr auto semantic = ToArray<semantic_sv.size()>(semantic_sv);
+            constexpr auto Semantic = ToArray<SemanticString.size()>(SemanticString);
 
-            // Concatenate step by step
-            constexpr auto part1 = ConcatArrays(flags, open_bracket);
-            constexpr auto part2 = ConcatArrays(part1, semantic);
-            constexpr auto part3 = ConcatArrays(part2, close_bracket_colon);
-            constexpr auto part4 = ConcatArrays(part3, reset);
-            constexpr auto result = ConcatArrays(part4, space);
-
-            return result;
+            return ConcatArrays(Flags, OpenBracket, Semantic, CloseBracket, Reset);
         }
 
         template <typename _Severity>
         requires IsConsoleSeverityLevelType<_Severity>
         static consteval auto GetLogPrefixUnstyled()
         {
-            constexpr auto semantic_sv = magic_enum::enum_name(_Severity::SemanticValue);
-            constexpr auto open_bracket = ToArray<1>("[");
-            constexpr auto close_bracket_colon = ToArray<2>("]:");
-            constexpr auto space = ToArray<1>(" ");
+            constexpr auto SemanticString = magic_enum::enum_name(_Severity::SemanticValue);
 
-            constexpr auto semantic = ToArray<semantic_sv.size()>(semantic_sv);
+            constexpr auto OpenBracket = ToArray("[");
+            constexpr auto CloseBracket = ToArray("]:");
 
-            constexpr auto part1 = ConcatArrays(open_bracket, semantic);
-            constexpr auto part2 = ConcatArrays(part1, close_bracket_colon);
-            constexpr auto result = ConcatArrays(part2, space);
+            constexpr auto Semantic = ToArray<SemanticString.size()>(SemanticString);
 
-            return result;
+            return ConcatArrays(OpenBracket, Semantic, CloseBracket);
         }
 
     public:
@@ -106,29 +70,90 @@ namespace Mosaic
         requires IsConsoleSeverityLevelType<_Severity>
         static void Log(const std::format_string<_Args...>& message, _Args&&... args)
         {
-            constexpr auto prefix = GetLogPrefixStyled<_Severity>();
+            constexpr auto Prefix = GetLogPrefixStyled<_Severity>();
 
-            std::cout << prefix.data() << " " << std::format(message, std::forward<_Args>(args)...) << '\n';
+            std::cout << Prefix.data() << " " << std::format(message, std::forward<_Args>(args)...) << '\n';
         }
 
         template <typename _Severity, typename... _Args>
         requires IsConsoleSeverityLevelType<_Severity>
-        static void Log(ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args);
+        void Log(ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args)
+        {
+            constexpr auto Prefix = GetLogPrefixUnstyled<_Severity>();
+
+            if (not mFileOutputs.contains(outputHandle))
+            {
+                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Log will be redirected to console", outputHandle);
+
+                Log<_Severity>(message, args...);
+            }
+            else
+            {
+                auto& output = mFileOutputs[outputHandle];
+
+                output.mStream << Prefix.data() << " " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.mStream.flush();
+            }
+        }
 
         template <typename... _Args>
-        [[noreturn]] static void Halt(const std::format_string<_Args...>& message, _Args&&... args);
+        [[noreturn]] static void Halt(const std::format_string<_Args...>& message, _Args&&... args)
+        {
+            std::cout << "\033[31m\033[1m[ENGINE_HALT]: \033[0m" << std::format(message, std::forward<_Args>(args)...) << '\n';
+
+            std::exit(1); // TODO: safely exit program
+        }
 
         template <typename... _Args>
-        [[noreturn]] void Halt(ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args);
+        [[noreturn]] void Halt(ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args)
+        {
+            if (not mFileOutputs.contains(outputHandle))
+            {
+                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Halt message will be redirected to console", outputHandle);
+
+                Halt(message, args...);
+            }
+            else
+            {
+                auto& output = mFileOutputs[outputHandle];
+
+                output.mStream << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.mStream.flush();
+
+                std::exit(1); // TODO: safely exit program
+            }
+        }
 
         template <typename... _Args>
-        [[noreturn]] static void Halt(std::int32_t exitCode, const std::format_string<_Args...>& message, _Args&&... args);
+        [[noreturn]] static void Halt(std::int32_t exitCode, const std::format_string<_Args...>& message, _Args&&... args)
+        {
+            std::cout << "\033[31m\033[1m[ENGINE HALT]: \033[0m" << std::format(message, std::forward<_Args>(args)...) << '\n';
+
+            std::exit(exitCode); // TODO: safely exit program
+        }
 
         template <typename... _Args>
-        [[noreturn]] void Halt(std::int32_t exitCode, ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args);
+        [[noreturn]] void Halt(std::int32_t exitCode, ConsoleOutputHandle outputHandle, const std::format_string<_Args...>& message, _Args&&... args)
+        {
+            if (not mFileOutputs.contains(outputHandle))
+            {
+                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Halt message will be redirected to console", outputHandle);
+
+                Halt(exitCode, message, args...);
+            }
+            else
+            {
+                auto& output = mFileOutputs[outputHandle];
+
+                output.mStream << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.mStream.flush();
+
+                std::exit(exitCode); // TODO: safely exit program
+            }
+        }
 
     private:
-        Console() = default;
+        Console();
 
         std::unordered_map<ConsoleOutputHandle, ConsoleFileOutput> mFileOutputs;
         std::unordered_map<std::string, ConsoleOutputHandle> mFilepathHandles;
