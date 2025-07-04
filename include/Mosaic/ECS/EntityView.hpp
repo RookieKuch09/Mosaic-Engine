@@ -1,21 +1,21 @@
 #pragma once
 
-#include <Mosaic/ECS/ECSManager.hpp>
 #include <Mosaic/ECS/Entity.hpp>
+#include <Mosaic/ECS/EntityManager.hpp>
 
 #include <vector>
 
 namespace Mosaic
 {
-    class ECSManager;
+    class EntityManager;
 
     template <typename... Components>
-    class ECSView
+    class EntityView
     {
     public:
         struct Iterator
         {
-            Iterator(ECSManager& manager, const std::vector<Entity>& entities, std::uint32_t index);
+            Iterator(EntityManager& manager, const std::vector<Entity>& entities, std::uint32_t index);
 
             bool operator!=(const Iterator& other) const;
 
@@ -24,7 +24,7 @@ namespace Mosaic
             std::tuple<Entity, Components&...> operator*() const;
 
         private:
-            ECSManager& mManager;
+            EntityManager& mManager;
             const std::vector<Entity>& mEntities;
             std::uint32_t mIndex;
         };
@@ -33,13 +33,13 @@ namespace Mosaic
         Iterator end();
 
     private:
-        ECSView(ECSManager& manager);
+        EntityView(EntityManager& manager);
 
-        ECSManager& mManager;
+        EntityManager& mManager;
         std::vector<Entity> mEntities;
 
-        friend class ECSManager;
+        friend class EntityManager;
     };
 }
 
-#include <Mosaic/Inline/ECS/ECSView.inl>
+#include <Mosaic/Inline/ECS/EntityView.inl>

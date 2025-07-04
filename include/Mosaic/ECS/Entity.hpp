@@ -6,12 +6,12 @@
 
 namespace Mosaic
 {
-    using EntityID = std::uint32_t;
+    using EntityHandle = std::uint32_t;
     using EntityGeneration = std::uint32_t;
 
     struct MOSAIC_PUBLIC_EXPOSURE Entity
     {
-        EntityID ID;
+        EntityHandle Handle;
         EntityGeneration Generation;
 
         bool operator==(const Entity& other) const;

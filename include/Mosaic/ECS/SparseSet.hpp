@@ -45,7 +45,7 @@ namespace Mosaic
         std::vector<Component> Components;
         std::vector<Entity> Entities;
 
-        std::unordered_map<EntityID, std::uint32_t> EntityIndex;
+        std::unordered_map<EntityHandle, std::uint32_t> EntityIndex;
     };
 }
 

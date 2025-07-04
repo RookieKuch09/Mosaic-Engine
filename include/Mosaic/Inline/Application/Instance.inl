@@ -6,7 +6,7 @@ namespace Mosaic
 {
     template <typename T> requires std::is_base_of_v<Application, T>
     Instance<T>::Instance()
-        : mApplication(), mInstanceResources(mConsole, mWindow, mRenderer, mECSManager, mEventManager), mECSManager(mInstanceResources), mEventManager(mInstanceResources), mRunning(true), mWindow(mInstanceResources), mRenderer(mInstanceResources)
+        : mApplication(), mInstanceResources(mConsole, mWindow, mRenderer, mEntityManager, mEventManager), mEntityManager(mInstanceResources), mEventManager(mInstanceResources), mRunning(true), mWindow(mInstanceResources), mRenderer(mInstanceResources)
     {
     }
 
@@ -29,7 +29,7 @@ namespace Mosaic
                 mWindow.Update();
                 mRenderer.Update();
 
-                mECSManager.Update();
+                mEntityManager.Update();
                 mEventManager.Update();
             }
 

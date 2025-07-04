@@ -7,9 +7,9 @@
 #include <Mosaic/Debug/Console/Resource.hpp>
 #include <Mosaic/Debug/Console/Severity.hpp>
 
-#include <Mosaic/ECS/ECSManager.hpp>
-#include <Mosaic/ECS/ECSView.hpp>
 #include <Mosaic/ECS/Entity.hpp>
+#include <Mosaic/ECS/EntityManager.hpp>
+#include <Mosaic/ECS/EntityView.hpp>
 #include <Mosaic/ECS/EventManager.hpp>
 #include <Mosaic/ECS/SparseSet.hpp>
 

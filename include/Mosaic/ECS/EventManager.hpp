@@ -14,10 +14,10 @@ namespace Mosaic
     class Application;
 
     template <typename... Components>
-    class ECSView;
+    class EntityView;
 
     template <typename Event, typename... Components>
-    using EventResponder = std::function<void(InstanceResources&, const Event&, ECSView<Components...>)>;
+    using EventResponder = std::function<void(InstanceResources&, const Event&, EntityView<Components...>)>;
 
     template <typename Event>
     using SimpleEventResponder = std::function<void(InstanceResources&, const Event&)>;
@@ -32,7 +32,7 @@ namespace Mosaic
         void AddResponder(const SimpleEventResponder<Event>& responder);
 
         template <typename Event, typename... Components>
-        void AddResponder(void (*responder)(InstanceResources&, const Event&, ECSView<Components...>));
+        void AddResponder(void (*responder)(InstanceResources&, const Event&, EntityView<Components...>));
 
         template <typename Event>
         void AddResponder(void (*responder)(InstanceResources&, const Event&));

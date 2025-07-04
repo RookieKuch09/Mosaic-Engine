@@ -42,7 +42,7 @@ namespace Mosaic
     {
         mBackend->Update();
 
-        auto view = mInstanceResources.ECSManager.QueryView<RendererStateComponent>();
+        auto view = mInstanceResources.EntityManager.QueryView<RendererStateComponent>();
 
         for (auto [entity, component] : view)
         {

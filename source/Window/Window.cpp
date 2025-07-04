@@ -76,7 +76,7 @@ namespace Mosaic
             mInstanceResources.EventManager.Emit<ApplicationExitEvent>(0);
         }
 
-        auto view = mInstanceResources.ECSManager.QueryView<WindowStateComponent>();
+        auto view = mInstanceResources.EntityManager.QueryView<WindowStateComponent>();
 
         for (auto [entity, component] : view)
         {

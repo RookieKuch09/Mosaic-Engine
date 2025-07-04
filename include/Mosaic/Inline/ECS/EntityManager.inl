@@ -4,16 +4,16 @@
 
 #include <Mosaic/Debug/Console/Resource.hpp>
 
-#include <Mosaic/ECS/ECSManager.hpp>
-#include <Mosaic/ECS/ECSView.hpp>
 #include <Mosaic/ECS/Entity.hpp>
+#include <Mosaic/ECS/EntityManager.hpp>
+#include <Mosaic/ECS/EntityView.hpp>
 
 #include <boost/type_index.hpp>
 
 namespace Mosaic
 {
     template <typename Component>
-    void ECSManager::AddComponent(Entity entity, const Component& component)
+    void EntityManager::AddComponent(Entity entity, const Component& component)
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -43,7 +43,7 @@ namespace Mosaic
     }
 
     template <typename Component>
-    void ECSManager::RemoveComponent(Entity entity)
+    void EntityManager::RemoveComponent(Entity entity)
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -67,13 +67,13 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    ECSView<Components...> ECSManager::QueryView()
+    EntityView<Components...> EntityManager::QueryView()
     {
-        return ECSView<Components...>(*this);
+        return EntityView<Components...>(*this);
     }
 
     template <typename Component>
-    SparseSet<Component>* ECSManager::GetComponentSet()
+    SparseSet<Component>* EntityManager::GetComponentSet()
     {
         auto typeIndex = std::type_index(typeid(Component));
 

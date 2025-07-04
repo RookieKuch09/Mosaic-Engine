@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Mosaic/ECS/ECSManager.hpp>
+#include <Mosaic/ECS/EntityManager.hpp>
 #include <Mosaic/ECS/EventManager.hpp>
 
 namespace Mosaic
@@ -22,7 +22,7 @@ namespace Mosaic
     }
 
     template <typename Event, typename... Components>
-    void EventManager::AddResponder(void (*responder)(InstanceResources&, const Event&, ECSView<Components...>))
+    void EventManager::AddResponder(void (*responder)(InstanceResources&, const Event&, EntityView<Components...>))
     {
         AddResponder<Event, Components...>(EventResponder<Event, Components...>(responder));
     }
@@ -61,7 +61,7 @@ namespace Mosaic
         {
             const Event& event = std::any_cast<Event>(eventData);
 
-            auto view = mInstanceResources.ECSManager.QueryView<Components...>();
+            auto view = mInstanceResources.EntityManager.QueryView<Components...>();
 
             userFn(resources, event, view);
         };

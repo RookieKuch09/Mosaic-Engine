@@ -1,31 +1,31 @@
 #pragma once
 
-#include <Mosaic/ECS/ECSView.hpp>
+#include <Mosaic/ECS/EntityView.hpp>
 
 #include <tuple>
 
 namespace Mosaic
 {
     template <typename... Components>
-    ECSView<Components...>::Iterator::Iterator(ECSManager& manager, const std::vector<Entity>& entities, std::uint32_t index)
+    EntityView<Components...>::Iterator::Iterator(EntityManager& manager, const std::vector<Entity>& entities, std::uint32_t index)
         : mManager(manager), mEntities(entities), mIndex(index)
     {
     }
 
     template <typename... Components>
-    bool ECSView<Components...>::Iterator::operator!=(const Iterator& other) const
+    bool EntityView<Components...>::Iterator::operator!=(const Iterator& other) const
     {
         return mIndex != other.mIndex;
     }
 
     template <typename... Components>
-    void ECSView<Components...>::Iterator::operator++()
+    void EntityView<Components...>::Iterator::operator++()
     {
         mIndex++;
     }
 
     template <typename... Components>
-    std::tuple<Entity, Components&...> ECSView<Components...>::Iterator::operator*() const
+    std::tuple<Entity, Components&...> EntityView<Components...>::Iterator::operator*() const
     {
         Entity entity = mEntities[mIndex];
 
@@ -33,19 +33,19 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    ECSView<Components...>::Iterator ECSView<Components...>::begin()
+    EntityView<Components...>::Iterator EntityView<Components...>::begin()
     {
         return Iterator(mManager, mEntities, 0);
     }
 
     template <typename... Components>
-    ECSView<Components...>::Iterator ECSView<Components...>::end()
+    EntityView<Components...>::Iterator EntityView<Components...>::end()
     {
         return Iterator(mManager, mEntities, mEntities.size());
     }
 
     template <typename... Components>
-    ECSView<Components...>::ECSView(ECSManager& manager)
+    EntityView<Components...>::EntityView(EntityManager& manager)
         : mManager(manager)
     {
         auto* primarySet = mManager.GetComponentSet<std::tuple_element_t<0, std::tuple<Components...>>>();

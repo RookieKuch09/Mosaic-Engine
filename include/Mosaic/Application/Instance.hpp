@@ -5,7 +5,7 @@
 #include <Mosaic/Application/Application.hpp>
 #include <Mosaic/Application/Resources.hpp>
 
-#include <Mosaic/ECS/ECSManager.hpp>
+#include <Mosaic/ECS/EntityManager.hpp>
 #include <Mosaic/ECS/EventManager.hpp>
 
 #include <Mosaic/Debug/Console/Resource.hpp>
@@ -38,7 +38,7 @@ namespace Mosaic
 
         InstanceResources mInstanceResources;
 
-        ECSManager mECSManager;
+        EntityManager mEntityManager;
         EventManager mEventManager;
 
         Console mConsole;

@@ -17,20 +17,20 @@ namespace Mosaic
     class Console;
 
     template <typename... Components>
-    class ECSView;
+    class EntityView;
 
-    using ECSSystem = std::function<void(InstanceResources&)>;
+    using EntitySystem = std::function<void(InstanceResources&)>;
 
-    class MOSAIC_PUBLIC_EXPOSURE ECSManager
+    class MOSAIC_PUBLIC_EXPOSURE EntityManager
     {
     public:
-        ECSManager(const ECSManager& other) = delete;
-        ECSManager(ECSManager&& other) noexcept = default;
+        EntityManager(const EntityManager& other) = delete;
+        EntityManager(EntityManager&& other) noexcept = default;
 
-        auto operator=(const ECSManager& other) -> ECSManager& = delete;
-        auto operator=(ECSManager&& other) noexcept -> ECSManager& = delete;
+        auto operator=(const EntityManager& other) -> EntityManager& = delete;
+        auto operator=(EntityManager&& other) noexcept -> EntityManager& = delete;
 
-        ~ECSManager() = default;
+        ~EntityManager() = default;
 
         [[nodiscard]] Entity CreateEntity();
 
@@ -49,12 +49,12 @@ namespace Mosaic
         [[nodiscard]] bool EntityExists(Entity entity) const;
 
         template <typename... Components>
-        [[nodiscard]] ECSView<Components...> QueryView();
+        [[nodiscard]] EntityView<Components...> QueryView();
 
-        void AddSystem(const ECSSystem& system);
+        void AddSystem(const EntitySystem& system);
 
     private:
-        ECSManager(InstanceResources& resources);
+        EntityManager(InstanceResources& resources);
 
         void Update();
 
@@ -63,9 +63,9 @@ namespace Mosaic
 
         std::unordered_map<std::type_index, std::unique_ptr<SparseSetInterface>> mComponentStorage;
 
-        std::vector<ECSSystem> mSystems;
+        std::vector<EntitySystem> mSystems;
         std::vector<EntityGeneration> mGenerations;
-        std::vector<EntityID> mFreedIDs;
+        std::vector<EntityHandle> mFreedIDs;
 
         InstanceResources& mInstanceResources;
 
@@ -73,9 +73,9 @@ namespace Mosaic
         friend class Instance;
 
         template <typename... Components>
-        friend class ECSView;
+        friend class EntityView;
     };
 
 }
 
-#include <Mosaic/Inline/ECS/ECSManager.inl>
+#include <Mosaic/Inline/ECS/EntityManager.inl>
