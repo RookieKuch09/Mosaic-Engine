@@ -4,28 +4,27 @@ namespace Mosaic
 {
     ConsoleOutputHandle Console::CreateOutput(const std::string& filepath)
     {
-        if (mFilepathHandles.contains(filepath))
+        auto it = mFilepathHandles.find(filepath);
+
+        if (it != mFilepathHandles.end())
         {
-            return mFilepathHandles[filepath];
+            return it->second;
         }
-        else
+
+        auto outputHandle = ConsoleOutputHandle(mNextAvailableOutputHandle);
+
+        mNextAvailableOutputHandle++;
+
+        auto& output = mFileOutputs[outputHandle];
+
+        output.open(filepath, std::ios::app);
+
+        if (!output)
         {
-            auto outputHandle = mNextAvailableOutputHandle;
-
-            mNextAvailableOutputHandle++;
-
-            auto& output = mFileOutputs[outputHandle];
-
-            output.mFilepath = filepath;
-            output.mStream.open(filepath, std::ios::app);
-
-            if (!output.mStream)
-            {
-                Halt("Failed to create ConsoleOutputHandle with path {}", filepath);
-            }
-
-            return outputHandle;
+            Halt("Failed to create ConsoleOutputHandle with path {}", filepath);
         }
+
+        return outputHandle;
     }
 
     Console::Console()

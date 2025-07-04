@@ -4,7 +4,6 @@
 #include <Mosaic/Debug/Console/Severity.hpp>
 
 #include <cstdint>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -15,15 +14,6 @@
 namespace Mosaic
 {
     class Application;
-
-    class ConsoleFileOutput
-    {
-    private:
-        std::ofstream mStream;
-        std::string mFilepath;
-
-        friend class Console;
-    };
 
     using ConsoleEngineLogNotice = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_NOTICE, ConsoleTextColour::Blue, ConsoleTextStyle::Bold>;
     using ConsoleEngineLogSuccess = ConsoleSeverityLevel<ConsoleEngineLogSeverity::ENGINE_SUCCESS, ConsoleTextColour::Green, ConsoleTextStyle::Bold>;
@@ -83,7 +73,7 @@ namespace Mosaic
 
             if (not mFileOutputs.contains(outputHandle))
             {
-                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Log will be redirected to console", outputHandle);
+                Log<ConsoleEngineLogWarning>("Provided ConsoleOutputHandle does not exist. Log will be redirected to console");
 
                 Log<_Severity>(message, args...);
             }
@@ -91,8 +81,8 @@ namespace Mosaic
             {
                 auto& output = mFileOutputs[outputHandle];
 
-                output.mStream << Prefix.data() << " " << std::format(message, std::forward<_Args>(args)...) << '\n';
-                output.mStream.flush();
+                output << Prefix.data() << " " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.flush();
             }
         }
 
@@ -109,7 +99,7 @@ namespace Mosaic
         {
             if (not mFileOutputs.contains(outputHandle))
             {
-                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Halt message will be redirected to console", outputHandle);
+                Log<ConsoleEngineLogWarning>("Provided ConsoleOutputHandle does not exist. Halt message will be redirected to console");
 
                 Halt(message, args...);
             }
@@ -117,8 +107,8 @@ namespace Mosaic
             {
                 auto& output = mFileOutputs[outputHandle];
 
-                output.mStream << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
-                output.mStream.flush();
+                output << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.flush();
 
                 std::exit(1); // TODO: safely exit program
             }
@@ -127,7 +117,7 @@ namespace Mosaic
         template <typename... _Args>
         [[noreturn]] static void Halt(std::int32_t exitCode, const std::format_string<_Args...>& message, _Args&&... args)
         {
-            std::cout << "\033[31m\033[1m[ENGINE HALT]: \033[0m" << std::format(message, std::forward<_Args>(args)...) << '\n';
+            std::cout << "\033[31m\033[1m[ENGINE_HALT]: \033[0m" << std::format(message, std::forward<_Args>(args)...) << '\n';
 
             std::exit(exitCode); // TODO: safely exit program
         }
@@ -137,7 +127,7 @@ namespace Mosaic
         {
             if (not mFileOutputs.contains(outputHandle))
             {
-                Log<ConsoleEngineLogWarning>("ConsoleOutputHandle {} does not exist. Halt message will be redirected to console", outputHandle);
+                Log<ConsoleEngineLogWarning>("Provided ConsoleOutputHandle does not exist. Halt message will be redirected to console");
 
                 Halt(exitCode, message, args...);
             }
@@ -145,8 +135,8 @@ namespace Mosaic
             {
                 auto& output = mFileOutputs[outputHandle];
 
-                output.mStream << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
-                output.mStream.flush();
+                output << "[ENGINE_HALT]: " << std::format(message, std::forward<_Args>(args)...) << '\n';
+                output.flush();
 
                 std::exit(exitCode); // TODO: safely exit program
             }
@@ -155,10 +145,10 @@ namespace Mosaic
     private:
         Console();
 
-        std::unordered_map<ConsoleOutputHandle, ConsoleFileOutput> mFileOutputs;
+        std::unordered_map<ConsoleOutputHandle, std::ofstream> mFileOutputs;
         std::unordered_map<std::string, ConsoleOutputHandle> mFilepathHandles;
 
-        ConsoleOutputHandle mNextAvailableOutputHandle;
+        std::uint32_t mNextAvailableOutputHandle;
 
         template <typename T> requires std::is_base_of_v<Application, T>
         friend class Instance;
