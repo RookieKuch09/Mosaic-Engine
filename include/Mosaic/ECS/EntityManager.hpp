@@ -24,29 +24,27 @@ namespace Mosaic
     class MOSAIC_PUBLIC_EXPOSURE EntityManager
     {
     public:
-        EntityManager(const EntityManager& other) = delete;
-        EntityManager(EntityManager&& other) noexcept = default;
+        EntityManager(const EntityManager&) = delete;
+        EntityManager(EntityManager&&) noexcept = delete;
 
-        auto operator=(const EntityManager& other) -> EntityManager& = delete;
-        auto operator=(EntityManager&& other) noexcept -> EntityManager& = delete;
+        EntityManager& operator=(const EntityManager&) = delete;
+        EntityManager& operator=(EntityManager&&) noexcept = delete;
 
-        ~EntityManager() = default;
+        [[nodiscard]] EntityHandle CreateEntity();
 
-        [[nodiscard]] Entity CreateEntity();
-
-        [[nodiscard]] std::vector<Entity> CreateEntities(std::uint32_t count);
+        [[nodiscard]] std::vector<EntityHandle> CreateEntities(std::uint32_t count);
 
         template <typename Component>
-        void AddComponent(Entity entity, const Component& component = Component{});
+        void AddComponent(EntityHandle entity, const Component& component = Component{});
 
         template <typename Component>
-        void RemoveComponent(Entity entity);
+        void RemoveComponent(EntityHandle entity);
 
-        void DestroyEntity(Entity entity);
+        void DestroyEntity(EntityHandle entity);
 
-        void DestroyEntities(const std::vector<Entity>& entities);
+        void DestroyEntities(const std::vector<EntityHandle>& entities);
 
-        [[nodiscard]] bool EntityExists(Entity entity) const;
+        [[nodiscard]] bool EntityExists(EntityHandle entity) const;
 
         template <typename... Components>
         [[nodiscard]] EntityView<Components...> QueryView();
@@ -55,6 +53,7 @@ namespace Mosaic
 
     private:
         EntityManager(InstanceResources& resources);
+        ~EntityManager() = default;
 
         void Update();
 
@@ -64,8 +63,9 @@ namespace Mosaic
         std::unordered_map<std::type_index, std::unique_ptr<SparseSetInterface>> mComponentStorage;
 
         std::vector<EntitySystem> mSystems;
-        std::vector<EntityGeneration> mGenerations;
-        std::vector<EntityHandle> mFreedIDs;
+
+        std::vector<std::uint32_t> mGenerations;
+        std::vector<std::uint32_t> mFreedHandles;
 
         InstanceResources& mInstanceResources;
 

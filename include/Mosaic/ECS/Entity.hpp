@@ -3,17 +3,30 @@
 #include <Mosaic/Macros/Exposure.hpp>
 
 #include <cstdint>
+#include <functional>
 
 namespace Mosaic
 {
-    using EntityHandle = std::uint32_t;
-    using EntityGeneration = std::uint32_t;
-
-    struct MOSAIC_PUBLIC_EXPOSURE Entity
+    struct MOSAIC_PUBLIC_EXPOSURE EntityHandle
     {
-        EntityHandle Handle;
-        EntityGeneration Generation;
+        std::uint32_t ID;
+        std::uint32_t Generation;
 
-        bool operator==(const Entity& other) const;
+        bool operator==(const EntityHandle& other) const;
+    };
+}
+
+namespace std
+{
+    template <>
+    struct hash<Mosaic::EntityHandle>
+    {
+        std::size_t operator()(const Mosaic::EntityHandle& handle) const noexcept
+        {
+            std::size_t h1 = std::hash<std::uint32_t>{}(handle.ID);
+            std::size_t h2 = std::hash<std::uint32_t>{}(handle.Generation);
+
+            return h1 ^ (h2 << 1);
+        }
     };
 }

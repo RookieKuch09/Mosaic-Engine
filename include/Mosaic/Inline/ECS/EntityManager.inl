@@ -13,7 +13,7 @@
 namespace Mosaic
 {
     template <typename Component>
-    void EntityManager::AddComponent(Entity entity, const Component& component)
+    void EntityManager::AddComponent(EntityHandle entity, const Component& component)
     {
         auto typeIndex = std::type_index(typeid(Component));
 
@@ -22,7 +22,9 @@ namespace Mosaic
         if (!mComponentStorage.contains(typeIndex))
         {
             auto newSet = std::make_unique<SparseSet<Component>>();
+
             set = newSet.get();
+
             mComponentStorage[typeIndex] = std::move(newSet);
         }
         else
@@ -43,7 +45,7 @@ namespace Mosaic
     }
 
     template <typename Component>
-    void EntityManager::RemoveComponent(Entity entity)
+    void EntityManager::RemoveComponent(EntityHandle entity)
     {
         auto typeIndex = std::type_index(typeid(Component));
 

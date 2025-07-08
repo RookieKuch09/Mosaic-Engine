@@ -15,17 +15,17 @@ namespace Mosaic
     public:
         struct Iterator
         {
-            Iterator(EntityManager& manager, const std::vector<Entity>& entities, std::uint32_t index);
+            Iterator(EntityManager& manager, const std::vector<EntityHandle>& entities, std::uint32_t index);
 
             bool operator!=(const Iterator& other) const;
 
             void operator++();
 
-            std::tuple<Entity, Components&...> operator*() const;
+            std::tuple<EntityHandle, Components&...> operator*() const;
 
         private:
             EntityManager& mManager;
-            const std::vector<Entity>& mEntities;
+            const std::vector<EntityHandle>& mEntities;
             std::uint32_t mIndex;
         };
 
@@ -36,7 +36,7 @@ namespace Mosaic
         EntityView(EntityManager& manager);
 
         EntityManager& mManager;
-        std::vector<Entity> mEntities;
+        std::vector<EntityHandle> mEntities;
 
         friend class EntityManager;
     };

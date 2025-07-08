@@ -2,8 +2,8 @@
 
 namespace Mosaic
 {
-    bool Entity::operator==(const Entity& other) const
+    bool EntityHandle::operator==(const EntityHandle& other) const
     {
-        return Handle == other.Handle && Generation == other.Generation;
+        return ID == other.ID && Generation == other.Generation;
     }
 }

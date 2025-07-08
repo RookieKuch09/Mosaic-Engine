@@ -7,7 +7,7 @@
 namespace Mosaic
 {
     template <typename... Components>
-    EntityView<Components...>::Iterator::Iterator(EntityManager& manager, const std::vector<Entity>& entities, std::uint32_t index)
+    EntityView<Components...>::Iterator::Iterator(EntityManager& manager, const std::vector<EntityHandle>& entities, std::uint32_t index)
         : mManager(manager), mEntities(entities), mIndex(index)
     {
     }
@@ -25,11 +25,11 @@ namespace Mosaic
     }
 
     template <typename... Components>
-    std::tuple<Entity, Components&...> EntityView<Components...>::Iterator::operator*() const
+    std::tuple<EntityHandle, Components&...> EntityView<Components...>::Iterator::operator*() const
     {
-        Entity entity = mEntities[mIndex];
+        EntityHandle entity = mEntities[mIndex];
 
-        return std::tuple<Entity, Components&...>(entity, *mManager.GetComponentSet<Components>()->Get(entity)...);
+        return std::tuple<EntityHandle, Components&...>(entity, *mManager.GetComponentSet<Components>()->Get(entity)...);
     }
 
     template <typename... Components>
@@ -55,7 +55,7 @@ namespace Mosaic
             return;
         }
 
-        for (const Entity& entity : primarySet->Entities)
+        for (const EntityHandle& entity : primarySet->Entities)
         {
             if ((mManager.GetComponentSet<Components>()->Has(entity) && ...))
             {

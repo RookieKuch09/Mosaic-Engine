@@ -5,56 +5,56 @@
 namespace Mosaic
 {
     template <typename Component>
-    void SparseSet<Component>::Insert(Console&, const Entity& entity, const Component& component)
+    void SparseSet<Component>::Insert(Console&, const EntityHandle& entity, const Component& component)
     {
-        if (EntityIndex.contains(entity.Handle))
+        if (EntityIndex.contains(entity))
         {
             // TODO: replace with log statement
 
             return;
         }
 
-        EntityIndex[entity.Handle] = Components.size();
+        EntityIndex[entity] = Components.size();
         Entities.emplace_back(entity);
         Components.emplace_back(component);
     }
 
     template <typename Component>
-    void SparseSet<Component>::Remove(Console&, const Entity& entity)
+    void SparseSet<Component>::Remove(Console&, const EntityHandle& entity)
     {
-        if (!EntityIndex.contains(entity.Handle))
+        if (!EntityIndex.contains(entity))
         {
             // TODO: replace with log statement
 
             return;
         }
 
-        std::uint32_t index = EntityIndex[entity.Handle];
-        Entity lastEntity = Entities.back();
+        std::uint32_t index = EntityIndex[entity];
+        EntityHandle lastEntity = Entities.back();
 
         Components[index] = Components.back();
         Entities[index] = lastEntity;
-        EntityIndex[lastEntity.Handle] = index;
+        EntityIndex[lastEntity] = index;
 
         Components.pop_back();
         Entities.pop_back();
-        EntityIndex.erase(EntityIndex[entity.Handle]);
+        EntityIndex.erase(entity);
     }
 
     template <typename Component>
-    Component* SparseSet<Component>::Get(const Entity& entity)
+    Component* SparseSet<Component>::Get(const EntityHandle& entity)
     {
-        if (!EntityIndex.contains(entity.Handle))
+        if (!EntityIndex.contains(entity))
         {
             return nullptr;
         }
 
-        return &Components[EntityIndex[entity.Handle]];
+        return &Components[EntityIndex[entity]];
     }
 
     template <typename Component>
-    bool SparseSet<Component>::Has(const Entity& entity) const
+    bool SparseSet<Component>::Has(const EntityHandle& entity) const
     {
-        return EntityIndex.contains(entity.Handle);
+        return EntityIndex.contains(entity);
     }
 }

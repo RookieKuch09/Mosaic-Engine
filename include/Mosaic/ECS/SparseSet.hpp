@@ -36,14 +36,14 @@ namespace Mosaic
         SparseSet(SparseSet&& other) noexcept = default;
         SparseSet& operator=(SparseSet&& other) noexcept = default;
 
-        void Insert(Console& console, const Entity& entity, const Component& component);
-        void Remove(Console& console, const Entity& entity);
+        void Insert(Console& console, const EntityHandle& entity, const Component& component);
+        void Remove(Console& console, const EntityHandle& entity);
 
-        [[nodiscard]] Component* Get(const Entity& entity);
-        [[nodiscard]] bool Has(const Entity& entity) const;
+        [[nodiscard]] Component* Get(const EntityHandle& entity);
+        [[nodiscard]] bool Has(const EntityHandle& entity) const;
 
         std::vector<Component> Components;
-        std::vector<Entity> Entities;
+        std::vector<EntityHandle> Entities;
 
         std::unordered_map<EntityHandle, std::uint32_t> EntityIndex;
     };
