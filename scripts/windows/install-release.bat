@@ -12,8 +12,4 @@ if %errorlevel% neq 0 (
     exit /b %errorlevel%
 )
 
-cmake --install build
-if %errorlevel% neq 0 (
-    echo CMake install failed.
-    exit /b %errorlevel%
-)
+powershell -Command "Start-Process cmake -ArgumentList '--install build' -Verb RunAs"

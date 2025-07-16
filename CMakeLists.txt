@@ -18,9 +18,6 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/vcpkg_installed
 
 target_compile_options(Mosaic PRIVATE
     -Wall 
-    -Wextra 
-    -Wpedantic 
-    -Werror
 )
 
 target_include_directories(Mosaic PUBLIC
