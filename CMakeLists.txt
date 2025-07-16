@@ -1,42 +1,36 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(MosaicEngine VERSION 25.0 LANGUAGES CXX)
-
-option(BUILD_SHARED_LIBS "Build Mosaic as a shared library" ON)
-
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-file(GLOB_RECURSE MOSAIC_SOURCES "source/*.cpp")
-file(GLOB_RECURSE MOSAIC_HEADERS "include/Mosaic/*.hpp" "include/Mosaic/*.inl")
+project(MosaicEngine VERSION 25.0 LANGUAGES CXX)
 
-find_package(glfw3 REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(OpenGL REQUIRED)
+file(GLOB_RECURSE MOSAIC_SOURCES "source/Mosaic/*.cpp")
+file(GLOB_RECURSE MOSAIC_HEADERS "include/Mosaic/*.hpp" "include/Mosaic/Inline/*.inl")
 
-add_library(Mosaic ${MOSAIC_SOURCES} ${MOSAIC_HEADERS})
-
-target_link_libraries(Mosaic PUBLIC glfw GLEW::GLEW OpenGL::GL)
-
-target_compile_options(Mosaic PRIVATE -Wall -Wextra -Wpedantic -Werror)
-
-target_include_directories(Mosaic
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+add_library(Mosaic SHARED
+    ${MOSAIC_SOURCES} 
+    ${MOSAIC_HEADERS}
 )
 
-install(CODE "
-    file(REMOVE_RECURSE \"\${CMAKE_INSTALL_PREFIX}/include/Mosaic\")
-")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/vcpkg_installed/x64-linux/share")
+
+target_compile_options(Mosaic PRIVATE
+    -Wall 
+    -Wextra 
+    -Wpedantic 
+    -Werror
+)
+
+target_include_directories(Mosaic PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 
 install(DIRECTORY include/Mosaic DESTINATION include)
 
-install(TARGETS Mosaic
+install(TARGETS Mosaic 
     EXPORT MosaicTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
@@ -78,9 +72,13 @@ if(UNIX)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         target_compile_definitions(Mosaic PUBLIC MOSAIC_PLATFORM_MACOS)
     else()
-        message(FATAL_ERROR "Unsupported Unix-like platform for Mosaic")
+        target_compile_definitions(Mosaic PUBLIC MOSAIC_PLATFORM_UNSUPPORTED)
+        message(FATAL_ERROR "Unsupported platform for Mosaic: ${CMAKE_SYSTEM_NAME}")
     endif()
+elseif(WIN32)
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_PLATFORM_WINDOWS)
 else()
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_PLATFORM_UNSUPPORTED)
     message(FATAL_ERROR "Unsupported platform for Mosaic: ${CMAKE_SYSTEM_NAME}")
 endif()
 
@@ -97,5 +95,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
     target_compile_definitions(Mosaic PUBLIC MOSAIC_BUILD_RELEASE)
 else()
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_BUILD_UNSUPPORTED)
     message(WARNING "Unrecognised build type for Mosaic: ${CMAKE_BUILD_TYPE}")
 endif()
