@@ -4,7 +4,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace Mosaic::Systems::ECS
+namespace Mosaic::ECS
 {
     template <typename Component>
     inline constexpr bool CompatibleComponent = !std::is_pointer_v<Component> &&
@@ -20,10 +20,10 @@ namespace Mosaic::Systems::ECS
 
     template <typename... Components>
     requires((CompatibleComponent<Components> && ...) && !HasDuplicateTypes<Components...>)
-    class ComponentTypes
+    class ECSDescriptor
     {
     public:
-        ComponentTypes() = delete;
+        ECSDescriptor() = delete;
 
         template <typename T>
         static constexpr bool Contains = (std::is_same_v<T, Components> || ...);
@@ -47,8 +47,8 @@ namespace Mosaic::Systems::ECS
     };
 
     template <typename>
-    inline constexpr bool IsComponentTypes = false;
+    inline constexpr bool IsECSDescriptor = false;
 
-    template <typename... Ts>
-    inline constexpr bool IsComponentTypes<ComponentTypes<Ts...>> = true;
+    template <typename... Components>
+    inline constexpr bool IsECSDescriptor<ECSDescriptor<Components...>> = true;
 }

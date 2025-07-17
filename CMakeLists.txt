@@ -94,6 +94,15 @@ write_basic_package_version_file(
     COMPATIBILITY SameMajorVersion
 )
 
+# Prepare to clean old include directories
+set(MOSAIC_INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include/Mosaic")
+
+# Clear the old header files to avoid stale code
+install(CODE "
+    message(STATUS \"Removing old headers from ${MOSAIC_INSTALL_INCLUDE_DIR}\")
+    file(REMOVE_RECURSE \"${MOSAIC_INSTALL_INCLUDE_DIR}\")
+")
+
 # Install all headers and inline files
 install(DIRECTORY include/Mosaic DESTINATION include)
 

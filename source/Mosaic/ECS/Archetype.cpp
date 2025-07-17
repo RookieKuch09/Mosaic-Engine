@@ -1,8 +1,8 @@
-#include <Mosaic/Systems/ECS/Archetype.hpp>
+#include <Mosaic/ECS/Archetype.hpp>
 
-namespace Mosaic::Systems::ECS
+namespace Mosaic::ECS
 {
-    bool Archetype::Insert(std::uint32_t id, EntityHandle entity)
+    bool Archetype::Insert(std::uint32_t id, Entity entity)
     {
         return mEntities.Insert(id, entity);
     }
@@ -12,13 +12,13 @@ namespace Mosaic::Systems::ECS
         return mEntities.Remove(id);
     }
 
-    SparseSet<EntityHandle>& Archetype::GetEntities()
+    Containers::SparseSet<Entity>& Archetype::GetEntities()
     {
         return mEntities;
     }
 
     std::size_t Archetype::Size() const
     {
-        return mEntities.Size();
+        return mEntities.DenseSize();
     }
 }

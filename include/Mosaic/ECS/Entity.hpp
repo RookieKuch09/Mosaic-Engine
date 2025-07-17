@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-namespace Mosaic::Systems::ECS
+namespace Mosaic::ECS
 {
-    struct EntityHandle
+    struct Entity
     {
         std::uint32_t ID;
         std::uint32_t Generation;

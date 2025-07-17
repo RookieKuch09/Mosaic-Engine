@@ -1,11 +1,14 @@
 #pragma once
 
-#include <Mosaic/Systems/ECS/Entity.hpp>
-#include <Mosaic/Systems/ECS/SparseSet.hpp>
+#include <Mosaic/Macros/Symbols.hpp>
 
-namespace Mosaic::Systems::ECS
+#include <Mosaic/Containers/SparseSet.hpp>
+
+#include <Mosaic/ECS/Entity.hpp>
+
+namespace Mosaic::ECS
 {
-    class Archetype
+    class MOSAIC_PUBLIC_SYMBOL Archetype
     {
     public:
         Archetype() = default;
@@ -17,14 +20,14 @@ namespace Mosaic::Systems::ECS
         Archetype& operator=(const Archetype&) = delete;
         Archetype& operator=(Archetype&&) noexcept = default;
 
-        [[nodiscard]] bool Insert(std::uint32_t id, EntityHandle entity);
+        [[nodiscard]] bool Insert(std::uint32_t id, Entity entity);
         [[nodiscard]] bool Remove(std::uint32_t id);
 
-        SparseSet<EntityHandle>& GetEntities();
+        Containers::SparseSet<Entity>& GetEntities();
 
         std::size_t Size() const;
 
     private:
-        SparseSet<EntityHandle> mEntities;
+        Containers::SparseSet<Entity> mEntities;
     };
 }
