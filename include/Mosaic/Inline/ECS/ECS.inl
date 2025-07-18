@@ -156,7 +156,7 @@ namespace Mosaic::ECS
 
             if (!sparseSet.Insert(entity.ID, component))
             {
-                mConsole.LogWarning("Entity(ID: {}, Generation: {}) already has a component of type {}", entity.ID, entity.Generation, boost::typeindex::type_id<Component>().pretty_name());
+                mConsole.LogWarning("Entity(ID: {}, Generation: {}) already has a component of type {}", entity.ID, entity.Generation, Types::Reflection::TypeInfo<Component>::Name);
 
                 return;
             }
@@ -204,7 +204,7 @@ namespace Mosaic::ECS
 
             if (!sparseSet.Remove(entity.ID))
             {
-                mConsole.LogWarning("Entity(ID: {}, Generation: {}) has no component of type {}", entity.ID, entity.Generation, boost::typeindex::type_id<Component>().pretty_name());
+                mConsole.LogWarning("Entity(ID: {}, Generation: {}) has no component of type {}", entity.ID, entity.Generation, Types::Reflection::TypeInfo<Component>::Name);
 
                 return;
             }

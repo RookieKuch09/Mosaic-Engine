@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Set output directories for the build
+# Set output directories for the bui
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -15,9 +15,6 @@ project(MosaicEngine VERSION 25.0 LANGUAGES CXX)
 file(GLOB_RECURSE MOSAIC_SOURCES "source/Mosaic/*.cpp")
 file(GLOB_RECURSE MOSAIC_HEADERS "include/Mosaic/*.hpp" "include/Mosaic/Inline/*.inl")
 
-find_package(magic_enum CONFIG REQUIRED)
-find_package(Boost REQUIRED COMPONENTS type_index)
-
 # Create the library target
 add_library(Mosaic SHARED
     ${MOSAIC_SOURCES} 
@@ -27,12 +24,6 @@ add_library(Mosaic SHARED
 # Set the target compile options
 target_compile_options(Mosaic PRIVATE
     -Wall 
-)
-
-# Link the target with the required libraries
-target_link_libraries(Mosaic PUBLIC
-    Boost::type_index
-    magic_enum::magic_enum
 )
 
 # Set the target include directories
@@ -67,6 +58,7 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
 elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
     target_compile_definitions(Mosaic PUBLIC MOSAIC_ARCH_ARM64)
 else()
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_ar_UNSUPPORTED)
     message(WARNING "Unsupported system architecture for Mosaic: ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
@@ -78,6 +70,18 @@ elseif(CMAKE_BUILD_TYPE MATCHES Release)
 else()
     target_compile_definitions(Mosaic PUBLIC MOSAIC_BUILD_UNSUPPORTED)
     message(WARNING "Unrecognised build type for Mosaic: ${CMAKE_BUILD_TYPE}")
+endif()
+
+# Set the compiler specific definitions
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_COMPILER_CLANG)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_COMPILER_GCC)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_COMPILER_MSVC)
+else()
+    target_compile_definitions(Mosaic PUBLIC MOSAIC_COMPILER_UNSUPPORTED)
+    message(FATAL_ERROR "Unsupported compiler for Mosaic: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
 # Create the config file for the package

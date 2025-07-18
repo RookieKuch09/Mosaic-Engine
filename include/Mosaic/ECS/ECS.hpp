@@ -10,11 +10,11 @@
 
 #include <Mosaic/Console/Console.hpp>
 
+#include <Mosaic/Types/Reflection/TypeInfo.hpp>
+
 #include <bitset>
 #include <tuple>
 #include <vector>
-
-#include <boost/type_index.hpp>
 
 namespace Mosaic::ECS
 {
